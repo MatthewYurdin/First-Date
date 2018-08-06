@@ -1,5 +1,5 @@
 # First-Date.js
-This is my Toolbox for Data Analysis of the everyday, nothing-too-weird variety. It's Vanilla JavaScript only, but depends on Basic.js, which handles logs, names, and list operators, and Rumpf.js, which exports datasets formatted for R and Python. 
+This is my Toolbox for Exploratory Data Analysis. It handles rectangular datasets in various formats. Results are printed to the console or added as SVG images to the host html file. Datasets can be exported in easy-to-read formats for R and Python. 
 
 ## Quick Start
 
@@ -19,72 +19,94 @@ Just include session_management.js, dataset_utils.js and analysis_utils.js in `<
 
 ## Documentation
 
+### Valid Formats
+
+The functions will accommodate four rectangular data formats. Each should be assigned as in the following examples:
+
+- One-dimensional array
+  `var my_data = [1979, 1941, 1977, 2009, 2009, 2011, 2016];`
+- Two-dimensional array
+  `var some_data = [["Matthew", 39, false],["Joel", 40, true], ["Kirstin", 41, true],["Zohar, 10, false]];`
+  
+- Object-of-arrays
+  `var dataset = {"age": [4, 8, 11, 40, 41], "hobby": ["trains", "dance", "gymnastics", "camping", "marathons"]};`
+  
+- Array-of-objects
+  `var data_frame = [{"ssn": 323791234, "alive": false}, {"ssn": 999103014, "alive": true}, {"ssn": 172330101, "alive":true}];`
+
+
 ### Randomness
 
 These functions come from dataset-utils.js.
 
-- random: function( a ){return _random( a ); },
-- shuffle: function( a ) {return _shuffle( a ); },
-- random_sample: function( a, b ) {return _random_sample( a, b ); },
-- noise: function( a ){return _noise( a ); },
-- coin_flip: function( a ){return _coin_flip( a ); },
-- plus_or_minus: function( a, b ){return _plus_or_minus( a, b ); },
-- dummy_array: function( a, b ){return _dummy_array( a, b ); },noise: function( a ){return _noise( a ); },
+- random():
+- shuffle():
+- random_sample():,
+- noise():
+- coin_flip():
+- plus_or_minus():
+- dummy_array():,
 
-### List Operators
+### Inspection & Combination
 Most of the following functions are overloaded and can handle an array or scalar values, an array of o...
 
-- Basic.distinct: function( a ){return _distinct( a ); },
-- Basic.includes: function( a, b ){return _includes( a, b ); },
-- Basic.insert: function( a, b, c ){ return _insert( a, b, c ); },
-- Basic.remove: function( a, b ){return _remove( a, b ); },
-- Basic.flatten: function( a ){return _flatten( a ); },
-- Basic.glue: function( a, b ) {return _glue( a, b ); },
-- Basic.marry: function( a, b ) {return _marry( a, b ); },
-- Basic.transform: function( a ){return _transform( a ); },
+- metadata():
+- scalar():
+- distinct_values():
+- distinct():
+- includes_element():
+- includes_property():
+- insert():
+- remove():
+- glue():
+- marry():
+- transform():
+- save_data():
 
 ### Set Operators
 
-- Basic.union: function( a, b ) {return _union( a, b ); },
-- Basic.intersection: function( a, b ) {return _intersection( a, b ); },
-- Basic.difference: function( a, b ) {return _difference( a, b ); },
+- union():
+- intersection():
+- difference:
+
+### Combinatorics
+
+- factorial():
+- combinations():
+- subsets():
+- multicombinations():
 
 ### Sorting
 
-- Basic.ascending
-- Basic.descending
+- compare_ascending():
+- compare_descending():
 
-### Typing
+### Univariate distributions & central tendencies
 
-- Basic.scalar: function( a ){ return _scalar( a ); },
-- Basic.detect_layout: function( a ){ return _detect_layout( a ); },
+- min():
+- max():
+- mean():
+- median():
+- mode():
+- mad():
+- variance():
+- gini():
+- impurity():
+- stemplot
+### Data missingness
 
-### Resampling
-
-- Kvunch.random_permutation
-- Kvunch.bootstrap
-
+### Anomoly-detection
+ 
 ### Clustering
 
-- Kvunch.distance_matrix
-- Kvunch.reduction_sort
+- distance_matrix():
+- reduction_sort():
 
 ### Contingency Tables
 
-- Kvunch.contingency_table
-- Kvunch.fisher_exact
-- Kvunch.chisq
-
-### Describing Univariate Distributions
-
-- Kvunch.min: function(x){return _min(x); },
-- Kvunch.max: function(x){return _max(x); },
-- Kvunch.mean: function(x, y){return _mean(x, y); },
-- Kvunch.median: function(x){return _median(x);},
-- Kvunch.mode: function(x){return _mode(x);},
-- Kvunch.variance: function(x){return _variance(x); },
-- Kvunch.gini: function(x){return _gini(x); },
-- Kvunch.impurity: function(x){return _impurity(x); },
+- contingency_table():
+- fisher_exact():
+- chisq():
 
 ### Comparing Distributions
 - Kvunch.mann_whitney: function(x, y){ return _mann_whitney( x, y ); },
@@ -93,8 +115,7 @@ Most of the following functions are overloaded and can handle an array or scalar
 - Kvunch.jaccard2
 - Kvunch.consistency
 
-## Combinatorics
-- Kvunch.factorial
+
 
 ## Other Stuff
 
