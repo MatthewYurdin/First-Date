@@ -1,16 +1,16 @@
-# Kvunch.js
+# First-Date.js
 This is my Toolbox for Data Analysis of the everyday, nothing-too-weird variety. It's Vanilla JavaScript only, but depends on Basic.js, which handles logs, names, and list operators, and Rumpf.js, which exports datasets formatted for R and Python. 
 
 ## Quick Start
 
-Just include Basic.js, Rumpf.js and Kvunch.js in `<script>` tags.
+Just include session_management.js, dataset_utils.js and analysis_utils.js in `<script>` tags.
 
 '''
 <html>
   <head>   
-    <script type="text/javascript" src="Basic_0_0_2.js"></script>
-    <script type="text/javascript" src="Rumpf_0_0_1.js"></script>
-    <script type="text/javascript" src="Kvunch_0_0_2.js"></script>
+    <script type="text/javascript" src="scripts/session_management.js"></script>
+    <script type="text/javascript" src="scripts/dataset_utils.js"></script>
+    <script type="text/javascript" src="analysis_utils.js"></script>
   </head>
   <body>
   </body>
@@ -21,15 +21,15 @@ Just include Basic.js, Rumpf.js and Kvunch.js in `<script>` tags.
 
 ### Randomness
 
-These functions come from Basic.js.
+These functions come from dataset-utils.js.
 
-- Basic.random: function( a ){return _random( a ); },
-- Basic.shuffle: function( a ) {return _shuffle( a ); },
-- Basic.random_sample: function( a, b ) {return _random_sample( a, b ); },
-- Basic.noise: function( a ){return _noise( a ); },
-- Basic.coin_flip: function( a ){return _coin_flip( a ); },
-- Basic.plus_or_minus: function( a, b ){return _plus_or_minus( a, b ); },
-- Basic.dummy_array: function( a, b ){return _dummy_array( a, b ); },noise: function( a ){return _noise( a ); },
+- random: function( a ){return _random( a ); },
+- shuffle: function( a ) {return _shuffle( a ); },
+- random_sample: function( a, b ) {return _random_sample( a, b ); },
+- noise: function( a ){return _noise( a ); },
+- coin_flip: function( a ){return _coin_flip( a ); },
+- plus_or_minus: function( a, b ){return _plus_or_minus( a, b ); },
+- dummy_array: function( a, b ){return _dummy_array( a, b ); },noise: function( a ){return _noise( a ); },
 
 ### List Operators
 Most of the following functions are overloaded and can handle an array or scalar values, an array of o...
