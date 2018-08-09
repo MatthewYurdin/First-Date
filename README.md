@@ -5,7 +5,7 @@ This is my Toolbox for Exploratory Data Analysis. It handles rectangular dataset
 
 Just include session_management.js, dataset_utils.js and analysis_utils.js in `<script>` tags.
 
-`
+```
 <html>
   <head>   
     <script type="text/javascript" src="scripts/session_management.js"></script>
@@ -15,7 +15,7 @@ Just include session_management.js, dataset_utils.js and analysis_utils.js in `<
   <body>
   </body>
 </html>
-`
+```
 
 ## Documentation
 
@@ -130,7 +130,7 @@ The library will accommodate four rectangular data formats. Each should be assig
 
 ## Other Stuff
 
-- Basic.show_log
-- Basic.save_log
-- Basic.user_update
-- Basic.settings
+- show_log():
+- save_log():
+- user_update():
+- settings():
