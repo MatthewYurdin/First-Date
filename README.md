@@ -5,7 +5,7 @@ This is my Toolbox for Exploratory Data Analysis. It handles rectangular dataset
 
 Just include session_management.js, dataset_utils.js and analysis_utils.js in `<script>` tags.
 
-'''
+`
 <html>
   <head>   
     <script type="text/javascript" src="scripts/session_management.js"></script>
@@ -15,13 +15,13 @@ Just include session_management.js, dataset_utils.js and analysis_utils.js in `<
   <body>
   </body>
 </html>
-'''
+`
 
 ## Documentation
 
 ### Valid Formats
 
-The functions will accommodate four rectangular data formats. Each should be assigned as in the following examples:
+The library will accommodate four rectangular data formats. Each should be assigned as in the following examples:
 
 - One-dimensional array
   `var my_data = [1979, 1941, 1977, 2009, 2009, 2011, 2016];`
@@ -37,8 +37,6 @@ The functions will accommodate four rectangular data formats. Each should be ass
 
 ### Randomness
 
-These functions come from dataset-utils.js.
-
 - random():
 - shuffle():
 - random_sample():,
@@ -48,7 +46,6 @@ These functions come from dataset-utils.js.
 - dummy_array():,
 
 ### Inspection & Combination
-Most of the following functions are overloaded and can handle an array or scalar values, an array of o...
 
 - metadata():
 - scalar():
@@ -56,64 +53,78 @@ Most of the following functions are overloaded and can handle an array or scalar
 - distinct():
 - includes_element():
 - includes_property():
-- insert():
-- remove():
+- drop():
 - glue():
-- marry():
-- transform():
+- TODO marry():
+- standardize_structure():
 - save_data():
 
+### Arithmetic
+
+ - sum():
+ - product():
+ - TODO string_sum():
+ - TODO string_product():
+ - TODO string_quotient
+    
 ### Set Operators
 
 - union():
 - intersection():
-- difference:
+- difference():
 
 ### Combinatorics
 
 - factorial():
 - combinations():
+- permutations():
 - subsets():
 - multicombinations():
 
 ### Sorting
 
-- compare_ascending():
-- compare_descending():
+- ascending():
+- descending():
 
 ### Univariate distributions & central tendencies
 
-- min():
-- max():
-- mean():
-- median():
-- mode():
-- mad():
-- variance():
-- gini():
-- impurity():
-- stemplot
+- TODO min():
+- TODO max():
+- TODO mean():
+- TODO median():
+- TODO mode():
+- TODO mad():
+- TODO variance():
+- TODO gini():
+- TODO impurity():
+- TODO stemplot():
+
 ### Data missingness
 
+- TODO corpus_plot():
+
 ### Anomoly-detection
- 
+
+- TODO thread_plot(): 
+
 ### Clustering
 
-- distance_matrix():
-- reduction_sort():
+- TODO distance_matrix():
+- TODO reduction_sort():
 
 ### Contingency Tables
 
-- contingency_table():
-- fisher_exact():
-- chisq():
+- TODO contingency_table():
+- TODO fisher_exact():
+- TODO chisq():
 
 ### Comparing Distributions
-- Kvunch.mann_whitney: function(x, y){ return _mann_whitney( x, y ); },
-- Kvunch.wilcoxon: function(x, y){ return _mann_whitney( x, y ); },
-- Kvunch.jaccard1
-- Kvunch.jaccard2
-- Kvunch.consistency
+- TODO super_stemplot():
+- TODO mann_whitney():
+- TODO wilcoxon():
+- TODO jaccard1():
+- TODO jaccard2():
+- TODO consistency():
 
 
 
