@@ -48,6 +48,8 @@ The library will accommodate four rectangular data formats. Each should be assig
 ### Inspection & Combination
 
 - metadata():
+- TODO head():
+- TODO tail():
 - scalar():
 - distinct_values():
 - distinct():
