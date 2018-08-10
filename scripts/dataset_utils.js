@@ -110,6 +110,7 @@ const factorial = num => {
   //if less than 20, compute actual factorial
   //if between 20 and 39, compute Stirling approximation
   //if 40 or more, return null
+  //TODO handle cases >= 40 with string arithmetic
   if (num === 0 || num === 1) {
     return 1;
   }
@@ -232,7 +233,7 @@ const distinct_values = (arr) => {
  * @param {array} arr - The array of all the values.
 */
 //TODO handle empty places in array?
-const count_missing_values = (arr) => missing_values(arr).length;
+const count_missing_values = (arr) => arr.filter(f => (!f)).length;
 
 /**
  * Returns true if value {thing} is of type string, number, or boolean.
@@ -300,7 +301,7 @@ const test_variable = (arr, name) => {
 
 const test_1d = (arr) => {
   let result = {};
-  result.structure = "1d-array"
+  result.structure = "1d_array"
   result.variables = [];
   result.variables.push(test_variable(arr, 0));
   result.valid = (result.variables[0].valid) ? true : false;
@@ -309,7 +310,7 @@ const test_1d = (arr) => {
 
 const test_2d = (arr) => {
   let result = {};
-  result.structure = '2d-array';
+  result.structure = '2d_array';
   result.variables = [];
   for (let i = 0; i < arr[0].length; i++){
     result.variables.push(test_variable(arr.map(m => m[i]), i));
@@ -320,7 +321,7 @@ const test_2d = (arr) => {
 
 const test_array_of_objects = list => {
   const result = {};
-  result.structure = 'array-of-objects';
+  result.structure = 'array_of_objects';
   result.variables = [];
   const props = Object.keys(list[0]);
   for (let i = 0; i < props.length; i++){
@@ -332,7 +333,7 @@ const test_array_of_objects = list => {
 
 const test_object_of_arrays = list => {
   const result = {};
-  result.structure = 'object-of-arrays';
+  result.structure = 'object_of_arrays';
   result.variables = [];
   const props = Object.keys(list);
   for (let i = 0; i < props.length; i++){
@@ -362,8 +363,8 @@ const test_object_of_arrays = list => {
 */
 const metadata = dataset => {
   let result;
-  if (list) {
-    if (Array.isArray(list)) {
+  if (dataset) {
+    if (Array.isArray(dataset)) {
       const test_value = dataset[0];
       if (Array.isArray(dataset[0])){
         result = test_2d(dataset);
@@ -396,9 +397,21 @@ const common_elements = (arr1, arr2) => {
 }
 
 /**
+ * Prints {dataset} to the console and the log.
+ * @param {object}  dataset.
+ *
+*/
+const print_data = (dataset) => {
+  let std = standardize_structure(dataset);
+  let msg = "print_data(): Dataset (" + std.standard.length + " rows):\n\n" + print_text(std, "\t");
+  console.log(msg);
+  update_log(Date.now(), msg);
+}
+
+/**
  * Returns a new object combining {top} and {bottom}.
- * @param {array|object} top - The array of values to probe.
- * @param {array|object} name - The variable name or array index to give to data in {arr}.
+ * @param {array|object} top - Dataset.
+ * @param {array|object} bottom - Dataset.
  * TODO limit 2d_array case to equal inner array length; limit array_of_objects case to common properties
 */
 const glue = (top, bottom, ) => {
@@ -467,33 +480,34 @@ const difference = ( x, y ) => {
  */
 const save_data = (dataset, file_name) => {
     let file_format = file_name.split(".")[1];
+    console.log("file_format: " + file_format);
     let mime;
-    if (file_format == 'json') {
+    if (file_format === 'json') {
         mime = 'text/json';
         dataset = JSON.stringify(dataset);
     }
-    if (file_format == 'js') {
+    if (file_format === 'js') {
         mime = 'text/javascript';
         dataset = 'var ' + file_name.split(".")[0] + ' = ' + JSON.stringify(dataset) + ';';
     }
-    else if (file_format == 'csv'){
+    else if (file_format === 'csv'){
         mime = 'text/csv';
-        dataset = print_text(standardize_structure(dataset), "\c");
+        dataset = print_text2(standardize_structure(dataset), ",");
     }
-    else if (file_format == 'tsv'){
-        mime = 'text/tsv';
-        dataset = print_text(standardize_structure(dataset), "\c");
+    else if (file_format === 'tsv'){
+        mime = 'text/tab-separated-values';
+        dataset = print_text2(standardize_structure(dataset), "  ");
     }
-    else if (file_format == 'R') {
-        mime = 'text/plain';
-        dataset = print_R(standardize_structure(dataset), file_name.split(".")[0]);
+    else if (file_format === 'R') {
+        mime = 'text/x-r';
+        dataset = print_r(standardize_structure(dataset), file_name.split(".")[0]);
     }
-    else if (file_format == 'py') {
-        mime = 'text/plain';
+    else if (file_format === 'py') {
+        mime = 'text/x-python';
         dataset = print_py(standardize_structure(dataset), file_name.split(".")[0]);
     }
     else {
-        throw new Error('Valid output formats are ".js", ".json", ".csv", ".tsv", ".R", or ".py".');
+        throw new Error('save_data(): Valid output formats are ".js", ".json", ".csv", ".tsv", ".R", or ".py".');
     }
     let element = document.createElement('a');
     element.setAttribute('href', ('data:' + mime + ';charset=utf-8,' + encodeURIComponent(dataset)));
@@ -503,12 +517,13 @@ const save_data = (dataset, file_name) => {
     element.click();
     document.body.removeChild(element);
     //TODO: How do I print name of specified dataset?
-    Log.text += update_log(Date.now(), "User downloaded a copy of a dataset as 'Dataset_" + Log.session + "." + file_format + "'.");
+    Log.text += update_log(Date.now(), "User downloaded a copy of a dataset as '" + file_name + "'.");
 }
 
 const standardize_structure = dataset => {
   const result = {};
   result.meta = metadata(dataset);
+  //console.log(JSON.stringify(result.meta));
   if (result.meta.structure === "1d_array"){
     result.standard = dataset.map(m => [m]);
     return result;
@@ -517,7 +532,7 @@ const standardize_structure = dataset => {
     result.standard = dataset;
     return result;
   }
-  else if (meta.structure === "array_of_objects"){
+  else if (result.meta.structure === "array_of_objects"){
     let names = meta.variables.map(m => m.name);
     let result = {};
     result.standard = [];
@@ -530,8 +545,9 @@ const standardize_structure = dataset => {
     }
     return result;
   }
-  else if (meta.structure === "object_of_arrays"){
-    let names = meta.variables.map(m => m.name);
+  else if (result.meta.structure === "object_of_arrays"){
+    let names = result.meta.variables.map(m => m.name);
+    console.log(names);
     result.standard = [];
     for (let i = 0; i < dataset[names[0]].length; i++){
       let row = [];
@@ -544,30 +560,94 @@ const standardize_structure = dataset => {
   }
 }
 
+const add_spaces = (text, size) => {
+  let result = text;
+  for (let i = 0; i < (size - text.toString().length); i++){
+    result += " ";
+  }
+  return result;
+}
+
 const print_text = (d, delim) =>{
   let result = "";
-  let variables = meta.variables.map(m => m.name);
+  let variables = d.meta.variables.map(m => m.name);
+  let widths = d.meta.variables.map(m => m.display_size);
+  for (let i = 0; i < variables.length; i++){
+    result += add_spaces(variables[i], widths[i]);
+    result += (i === (variables[i] - 1)) ? "" : delim;
+  }
+  result += "\n";
+  for (let i = 0; i < d.standard.length; i++){
+    for (let j = 0; j < variables.length; j++){
+      result += add_spaces(d.standard[i][j], widths[j]) + delim;
+      result += (j === (variables[j] - 1)) ? "" : delim;
+    }
+    result += "\n";
+  }
+  return result
+}
+
+const print_text2 = (d, delim) =>{
+  let result = "";
+  let variables = d.meta.variables.map(m => m.name);
   result += variables.join(delim) + "\n";
-  for (let i = 0; i < dataset.length; i++){
-    result += d.standard[i].join(delim) + "\n";
+  for (let i = 0; i < d.standard.length; i++){
+    for (let j = 0; j < variables.length; j++){
+      result += d.standard[i][j];
+      if (j < (variables.length - 1)) {
+        result += delim;
+      }
+      else {
+        result += "\n";
+      }
+    }
   }
   return result
 }
 
 const print_r = (d, name) =>{
+  const r_convert = (type, value) => {
+    console.log(type + " + " + value);
+    if (includes_element([null, 'undefined', "NaN"], value)){
+      return "NA";
+    }
+    else if (type === 'character') {
+      return ("'" + value + "'");
+    }
+    else if (type === 'mixed'){
+      return ("'" + value + "'");
+    }
+    else if (type === 'logical'){
+      if (value === true){
+        return 'TRUE';
+      }
+      else if (value === false){
+        return 'FALSE';
+      }
+    }
+    else {
+      return value;
+    }
+  }
   let result = "setwd()\n" + name + " <- data.frame(";
-  const types = {"number": "numeric", "integer": "numeric", "string":"character", "boolean":"logical"};
-  let names = d.meta.variables.map(m => [m.name,m.type]);
-  for (let i = 0; i < names.length; i++){
-    result += names[i][0] + " = " + types[d.meta.variables[i].type] + "(" + d.standard.length + ")";
-    if (i < (names.length-1)){
+  const types = {"real": "numeric", "integer": "numeric", "string":"character", "mixed":"character", "boolean":"logical"};
+  let vars = d.meta.variables.map(m => [m.name,m.type]);
+  for (let i = 0; i < vars.length; i++){
+    result += vars[i][0] + " = " + types[vars[i][1]] + "(" + d.standard.length + ")";
+    if (i < (vars.length-1)){
       result += ", ";
     }
     else result += ")\n";
   }
-  for (let i = 0; i < names.length; i++){
-    result += name + "$" + names[i] + " <- c(";
-    result += d.standard.map(m => m[i]).join(", ") + ")\n";
+  for (let i = 0; i < vars.length; i++){
+    result += name + "$" + vars[i][0] + " <- c(";
+    for (let j = 0; j < d.standard.length; j++){
+      result += r_convert(types[vars[i][1]], d.standard[j][i]);
+      if (j < (d.standard.length - 1)) {
+        result += ", ";
+      }
+    }
+    result += ")\n";
   }
   return result;
   //Make this:
@@ -579,23 +659,40 @@ const print_r = (d, name) =>{
 }
 
 const print_py = (d, name) =>{
-  let result = name + " = {\n";
-  const types = {"number": "numeric", "integer": "numeric", "string":"character", "boolean":"logical", "mixed": "character"};
-  let names = d.meta.variables.map(m => [m.name,m.type]);
-  for (let i = 0; i < names.length; i++){
-    result += ("[" + names[i][0] + ": ");
-    result += d[names[i]].map(m => py_type_conversion(types[d.meta.variables[i].type], m)).join(", ") + "]";
-    if (i < (names.length-1)){
-      result += ",\n";
+  const py_convert = (type, value) => {
+    if (type === "float") {
+      return (!!value) ? value : "NaN";
     }
-    else result += "\n";
+    else if (type === "int") {
+      return (!!value) ? value : "NaN";
+    }
+    else if (type === "string") {
+      return (!!value) ? '"' + value + '"' : '""';
+    }
+    else if (type === "bool") {
+      return (value === true) ? "True" : "False";
+    }
   }
-  result += "]";
+  let result = name + " = {";
+  const types = {"real": "float", "integer": "int", "string": "string", "boolean": "bool", "mixed": "string"};
+  let vars = d.meta.variables.map(m => [m.name,m.type]);
+  for (let i = 0; i < vars.length; i++){
+    result += ("'" + vars[i][0] + "': [");
+    for (let j = 0; j < d.standard.length; j++){
+      result += py_convert(types[vars[i][1]], d.standard[j][i]);
+      if (j < (d.standard.length - 1)) {
+        result += ", ";
+      }
+      else {
+        result += "]";
+      }
+    }
+    if (i < (vars.length - 1)){
+      result += ", ";
+    }
+    else {
+      result += "}\n";
+    }
+  }
   return result;
-}
-
-const py_type_conversion = (type, value) => {
-  if (type === "numeric") return (!!value) ? value : "NaN";
-  else if (type === "character") return (!!value) ? value : "";
-  else if (type === "logical") return (value === true) ? "True" : "False";
 }

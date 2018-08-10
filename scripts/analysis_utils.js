@@ -100,16 +100,18 @@ Math.log = (function() {
  * @param {object} arr - The array of numbers.
  * @param {string} mode - The type of mean: "arithmetic," "geometric," or "harmonic."
  */
+//TODO fix harmonic and geometric
 const mean = (arr, mode ='arithmetic') => {
   if (Array.isArray(arr) && arr.length > 0){
     if (mode == 'arithmetic') {
       return arr.reduce(function(sum, value){ return sum + value; }, 0) / arr.length;
     }
     else if (mode == 'geometric') {
-      return Math.log((arr.reduce(function(product, value){ return product * value; }, 0)), arr.length);
+      return Math.pow(arr.reduce((product, n) => (product * n), 1), (1 / arr.length));
+      //return Math.log((arr.reduce(function(product, value){ return product * value; }, 0)), arr.length);
     }
     else if (mode == 'harmonic') {
-      return arr.length / array.reduce(function(sum, value){ return sum + (1 / value); }, 0);
+      return arr.length / arr.reduce((inv_sum, n) => (inv_sum + (1 / n)), 0);
     }
   } else {
     throw new Error("mean() requires a non-zero-length numeric array");
@@ -117,9 +119,9 @@ const mean = (arr, mode ='arithmetic') => {
 }
 
 const variance = arr => {
-  let target = arr.slice(0).sort(Basic.ascending);
+  let target = arr.slice(0).sort(ascending);
   let result = {};
-  let mean = _mean(sample);
+  let mean = mean(arr);
   result.sse = sample.map(function(m){return (m - mean) * (m - mean);}).reduce(function(sum, value){ return sum + value; }, 0);
   result.rmse = Math.sqrt(result.sse / sample.length);
   result.range = target[sample.length-1] - target[0];

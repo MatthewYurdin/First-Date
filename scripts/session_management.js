@@ -1,6 +1,10 @@
 const SETTINGS = {DEFAULT_OUTPUT_FORMAT: "js"};
 
 // NAME & ID GENERATION ------------------------------------------- //
+/**
+ * Generate unique ID string.
+ * @param {number} len - The length (number of characters) in the ID.
+ */
  const generate_id = len => {
   const id_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let id = "";
@@ -29,17 +33,25 @@ const update_time = now => "@+" + ( (now - Log.initialized)/1000 ).toFixed( 2 ) 
 
 const log_message = msg => msg + "\n\n";
 
+/**
+ * Update session log.
+ * @param {datetime} now - The current time. Should be called with `date.now()`
+ * @param {string} message - The text to add to the session log
+ */
 const update_log = (now, message) => Log.text += update_time( now ) + log_message( message );
 
 /**
- * Update settings.
- * @constructor
+ * Update or print current settings. `settings()' will print settings to the console.
  * @param {object} setting - The name of the setting to update.
  * @param {object} value - The name of the value to assign to `setting`.
  */
 const settings = (setting, value) => {
-    SETTINGS[setting] = value;
-    Log.text += update_log("Settings updated..." + setting + " = " + value);
+    if (!!setting && !!value){
+      SETTINGS[setting] = value;
+      Log.text += update_log("Settings updated..." + setting + " = " + value);
+    } else {
+      console.log(JSON.stringify(SETTINGS));
+    }
 };
 
 /**
@@ -50,14 +62,14 @@ const show_log = () => console.log( Log.text );
 
 /**
  * Prints user text to log.
- * @constructor
  * @param {string} user_text - The text to add to the session log.
  */
-const user_update = ( user_text = "User updated the log.") => { let currently = Date.now(); Log.text += update_log( Date.now(), ( "from user..." + user_text ) ); };
+const user_update = (user_text = "User updated the log.") => {
+  Log.text += update_log( Date.now(), user_text);
+}
 
 /**
- * Downloads a session log.
- 
+ * Downloads the session log.
  */
 const save_log = () => {
  let element = document.createElement('a');
@@ -69,4 +81,3 @@ const save_log = () => {
  document.body.removeChild(element);
  update_log("User downloaded a copy of the log as 'session_log_" + Log.session + ".txt'");
 }
-
