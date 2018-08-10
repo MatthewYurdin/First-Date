@@ -1,16 +1,15 @@
 # First-Date.js
-This is my Toolbox for Exploratory Data Analysis. It handles rectangular datasets in various formats. Results are printed to the console or added as SVG images to the host html file. Datasets can be exported in easy-to-read formats for R and Python. 
+This is my Toolbox for Exploratory Data Analysis. It handles rectangular datasets in various formats. Results are printed to the console or added as SVG images to the host html file. Datasets can be exported in easy-to-read formats for R, SAS, Python, or Excel. 
 
 ## Quick Start
 
-Just include session_management.js, dataset_utils.js and analysis_utils.js in `<script>` tags.
+Just include `<script>` tags for FD.js and your data.
 
 ```
 <html>
   <head>   
-    <script type="text/javascript" src="scripts/session_management.js"></script>
-    <script type="text/javascript" src="scripts/dataset_utils.js"></script>
-    <script type="text/javascript" src="analysis_utils.js"></script>
+    <script type="text/javascript" src="scripts/FD.js"></script>
+    <script type="text/javascript" src="scripts/my_data.js"></script>
   </head>
   <body>
   </body>
@@ -35,28 +34,34 @@ The library will accommodate four rectangular data formats. Each should be assig
   `var data_frame = [{"ssn": 323791234, "alive": false}, {"ssn": 999103014, "alive": true}, {"ssn": 172330101, "alive":true}];`
 
 
+### Logging & Settings
+
+- show_log():
+- save_log():
+- user_update():
+- settings():
+
 ### Randomness
 
-- random():
+- random_element():
 - shuffle():
 - random_sample():,
-- noise():
+- random_int():
+- random_real():
 - coin_flip():
 - plus_or_minus():
-- dummy_array():,
+- dummy_array():
 
 ### Inspection & Combination
 
 - metadata():
-- TODO head():
-- TODO tail():
+- print_data():
 - scalar():
 - distinct_values():
-- distinct():
 - includes_element():
 - includes_property():
 - drop():
-- glue():
+- TODO glue():
 - TODO marry():
 - standardize_structure():
 - save_data():
@@ -67,7 +72,7 @@ The library will accommodate four rectangular data formats. Each should be assig
  - product():
  - TODO string_sum():
  - TODO string_product():
- - TODO string_quotient
+ - TODO string_quotient():
     
 ### Set Operators
 
@@ -88,7 +93,7 @@ The library will accommodate four rectangular data formats. Each should be assig
 - ascending():
 - descending():
 
-### Univariate distributions & central tendencies
+### Univariate Distributions & Central Tendencies
 
 - TODO min():
 - TODO max():
@@ -101,7 +106,7 @@ The library will accommodate four rectangular data formats. Each should be assig
 - TODO impurity():
 - TODO stemplot():
 
-### Data missingness
+### Data Missingness
 
 - TODO corpus_plot():
 
@@ -128,11 +133,6 @@ The library will accommodate four rectangular data formats. Each should be assig
 - TODO jaccard2():
 - TODO consistency():
 
+### Detecting Relationships
 
-
-## Other Stuff
-
-- show_log():
-- save_log():
-- user_update():
-- settings():
+- maeda_plot():
