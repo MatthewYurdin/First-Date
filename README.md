@@ -1,5 +1,5 @@
 # First-Date.js
-This is my Toolbox for Exploratory Data Analysis, especially datasets I'm handling for the first time. It handles rectangular datasets in various formats. Results may be printed to the console or added as SVG images to the host html file. Datasets can be exported in easy-to-read formats for R, SAS, Python, Excel, etc. 
+This is my Toolbox for Exploratory Data Analysis, especially for datasets I'm seeing for the first time. It handles rectangular datasets in various formats. Results may be printed to the console or in some cases, added as SVG images to the host html file. Datasets can also be exported in easy-to-read formats for R, SAS, Python, Excel, etc. 
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ Just include `<script>` tags for FD.js and your data.
 
 ### Valid Formats
 
-Most of the utilities in this library require assigning data to a ***dataset***, which can accommodate four input data formats. Each should be formatted as in the following examples:
+Many of the utilities in this library require assigning data to a ***dataset***, which can accommodate four input data formats. Each should be formatted as in one of the examples:
 
 - One-dimensional array
   `let my_data = [1979, 1941, 1977, 2009, 2009, 2011, 2016];`
@@ -35,18 +35,102 @@ Most of the utilities in this library require assigning data to a ***dataset***,
 
 ### Dataset Functions
 
- - `dataset(name, d)`: Creates a dataset assigned to ***name*** with data ***d***. ***d*** must be in one the four valid structures (see above). If ***d*** is not an Object-of-arrays, it will be converted to one. If no name is specified, function will return a list of available datasets.
+ - `FD.dataset(name, d)`: Creates a dataset assigned to ***name*** with data ***d***. ***d*** must be in one the four valid structures (see above). If ***d*** is not an Object-of-arrays, it will be converted to one. If no name is specified, function will return a list of available datasets.
 
- - `data(name)`: Returns dataset assigned to ***name***. Output is formatted as an Object-ofarrays.
+ - `FD.data(name)`: Returns dataset assigned to ***name***. Output will be formatted as an Object-of-arrays.
  
- - `declare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `true`. ***name*** refers to the target dataset. 
+ - `FD.declare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `true`. ***name*** refers to the target dataset.
  
+ - `FD.undeclare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `false`. ***name*** refers to the target dataset.
+ 
+ -`FD.common_variables(d1, d2)`: Returns array of variable names common to both datasets ***d1*** and ***d2***.
+ 
+ -`FD.print_dataset(d)`: Prints dataset ***d*** to the console and the log.
+ 
+ -`FD.drop(d, variables)`: Removes ***variables*** from dataset ***d***. ***d*** must be a string. ***variables*** must be an array of string variable names.
+ 
+ -`FD.glue(top, bottom)`: Returns concatenation of datasets ***top*** and ***bottom***. Result will be an Array-of-objects. 
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+
+### Array Functions
+
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ 
+ ### Randomness
+
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+
+### Combinatorics
+
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ ### Set Operators
+
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ ### Arithmetic Operators
+
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
+ 
+ -``:
 ### Logging & Settings
 
-- show_log():
-- save_log():
-- user_update():
-- settings():
+- `FD.show_log()`: Print the session log to the console.
+
+- `FD.save_log()`: Downloads the log as a text file. By default, the file name is the session ID.
+
+- `FD.user_update(message)`: Adds ***message*** to the log. 
+
+- `FD.settings(setting, value)`: Modifies session settings so ***setting*** equals ***value***. If ***setting*** is not specified, returns a list of settings and their current values. 
+
 
 ### Randomness
 
