@@ -35,17 +35,17 @@ Many of the utilities in this library require assigning data to a ***dataset***,
 
 ### Dataset Functions
 
- - `FD.dataset(name, d)`: Creates a dataset assigned to ***name*** with data ***d***. ***d*** must be in one the four valid structures (see above). If ***d*** is not an Object-of-arrays, it will be converted to one. If no name is specified, function will return a list of available datasets.
+ - `FD.dataset(name, d)`: Creates a dataset assigned to ***name*** with data ***d***. ***d*** must be in one of the four valid structures (see above). If ***d*** is not an Object-of-arrays, it will be converted to one. If ***name*** is not specified, function will return a list of available datasets.
 
- - `FD.data(name)`: Returns dataset assigned to **name**. Output will be formatted as an Object-of-arrays.
+ - `FD.data(name)`: Returns dataset assigned to ***name***. Output will be formatted as an Object-of-arrays.
  
  - `FD.declare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `true`. ***name*** refers to the target dataset.
  
  - `FD.undeclare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `false`. ***name*** refers to the target dataset.
  
- - `FD.common_variables(d1, d2)`: Returns array of variable names common to both datasets ***d1*** and ***d2***.
+ - `FD.common_variables(name1, name2)`: Returns an array of variable names common to both datasets ***name1*** and ***name2***.
  
- - `FD.print_dataset(d)`: Prints dataset ***d*** to the console and the log.
+ - `FD.print_dataset(name)`: Prints dataset ***name*** to the console and the log.
  
  -`FD.drop(d, variables)`: Removes ***variables*** from dataset ***d***. ***d*** must be a string. ***variables*** must be an array of string variable names.
  
@@ -55,19 +55,13 @@ Many of the utilities in this library require assigning data to a ***dataset***,
  
  - `FD.inner_join(left, right)`: Returns an Array-of-objects including only matching observations from **left** and **right** datasets. Matching is done on all variables common to both datasets. All variables are retained.
 
- 
- - `FD.left_join(left, right)`: Returns an Array-of-objects including only observations from the **left** dataset. Retains all **left** variables and all **right** variables for matching observations.
-
- 
- - ``:
- 
- - ``:
+ - `FD.left_join(left, right)`: Returns an Array-of-objects including only observations from the **left** dataset and atching observations from ***right***. Retains all ***left*** variables and all ***right*** variables for matching observations.
 
 ### Array Functions
 
- -``:
+ -`FD.includes_element(arr, element)`:
  
- -``:
+ -`FD.includes_property(obj, prop)`:
  
  -``:
  
