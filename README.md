@@ -1,5 +1,5 @@
 # First-Date.js
-This is my Toolbox for Exploratory Data Analysis. It handles rectangular datasets in various formats. Results are printed to the console or added as SVG images to the host html file. Datasets can be exported in easy-to-read formats for R, SAS, Python, or Excel. 
+This is my Toolbox for Exploratory Data Analysis, especially datasets I'm handling for the first time. It handles rectangular datasets in various formats. Results may be printed to the console or added as SVG images to the host html file. Datasets can be exported in easy-to-read formats for R, SAS, Python, Excel, etc. 
 
 ## Quick Start
 
@@ -20,10 +20,10 @@ Just include `<script>` tags for FD.js and your data.
 
 ### Valid Formats
 
-The library will accommodate four rectangular data formats. Each should be assigned as in the following examples:
+Most of the utilities in this library require assigning data to a ***dataset***, which can accommodate four input data formats. Each should be formatted as in the following examples:
 
 - One-dimensional array
-  `var my_data = [1979, 1941, 1977, 2009, 2009, 2011, 2016];`
+  `let my_data = [1979, 1941, 1977, 2009, 2009, 2011, 2016];`
 - Two-dimensional array
   `var some_data = [["Matthew", 39, false],["Joel", 40, true], ["Kirstin", 41, true],["Zohar, 10, false]];`
   
@@ -33,7 +33,14 @@ The library will accommodate four rectangular data formats. Each should be assig
 - Array-of-objects
   `var data_frame = [{"ssn": 323791234, "alive": false}, {"ssn": 999103014, "alive": true}, {"ssn": 172330101, "alive":true}];`
 
+### Dataset Functions
 
+ - `dataset(name, d)`: Creates a dataset assigned to ***name*** with data ***d***. ***d*** must be in one the four valid structures (see above). If ***d*** is not an Object-of-arrays, it will be converted to one. If no name is specified, function will return a list of available datasets.
+
+ - `data(name)`: Returns dataset assigned to ***name***. Output is formatted as an Object-ofarrays.
+ 
+ - `declare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `true`. ***name*** refers to the target dataset. 
+ 
 ### Logging & Settings
 
 - show_log():
