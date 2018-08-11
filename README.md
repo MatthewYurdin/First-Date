@@ -1,5 +1,5 @@
 # First-Date.js
-This is my Toolbox for Exploratory Data Analysis, especially for datasets I'm seeing for the first time. It handles rectangular datasets in various formats. Results may be printed to the console or in some cases, added as SVG images to the host html file. Datasets can also be exported in easy-to-read formats for R, SAS, Python, Excel, etc. 
+This is my Toolbox for exploring datasets I'm seeing for the first time. It can handle rectangular datasets in various formats (see below). Results may be printed to the console or, in some cases, added as SVG images to the host html file. Data can also be exported in easy-to-read formats for R, SAS, Python, Excel, etc. 
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ Just include `<script>` tags for FD.js and your data.
 
 ### Valid Formats
 
-Many of the utilities in this library require assigning data to a ***dataset***, which can accommodate four input data formats. Each should be formatted as in one of the examples:
+Many of the utilities in this library require assigning data to a ***dataset***, which can accommodate four input data formats:
 
 - One-dimensional array
   `let my_data = [1979, 1941, 1977, 2009, 2009, 2011, 2016];`
@@ -28,7 +28,7 @@ Many of the utilities in this library require assigning data to a ***dataset***,
   `var some_data = [["Matthew", 39, false],["Joel", 40, true], ["Kirstin", 41, true],["Zohar, 10, false]];`
   
 - Object-of-arrays
-  `var dataset = {"age": [4, 8, 11, 40, 41], "hobby": ["trains", "dance", "gymnastics", "camping", "marathons"]};`
+  `var dset = {"age": [4, 8, 11, 40, 41], "hobby": ["trains", "dance", "gymnastics", "camping", "marathons"]};`
   
 - Array-of-objects
   `var data_frame = [{"ssn": 323791234, "alive": false}, {"ssn": 999103014, "alive": true}, {"ssn": 172330101, "alive":true}];`
@@ -37,29 +37,31 @@ Many of the utilities in this library require assigning data to a ***dataset***,
 
  - `FD.dataset(name, d)`: Creates a dataset assigned to ***name*** with data ***d***. ***d*** must be in one the four valid structures (see above). If ***d*** is not an Object-of-arrays, it will be converted to one. If no name is specified, function will return a list of available datasets.
 
- - `FD.data(name)`: Returns dataset assigned to ***name***. Output will be formatted as an Object-of-arrays.
+ - `FD.data(name)`: Returns dataset assigned to **name**. Output will be formatted as an Object-of-arrays.
  
  - `FD.declare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `true`. ***name*** refers to the target dataset.
  
  - `FD.undeclare_id(name, variable)`: Sets metatdata ID flag on ***variable*** to `false`. ***name*** refers to the target dataset.
  
- -`FD.common_variables(d1, d2)`: Returns array of variable names common to both datasets ***d1*** and ***d2***.
+ - `FD.common_variables(d1, d2)`: Returns array of variable names common to both datasets ***d1*** and ***d2***.
  
- -`FD.print_dataset(d)`: Prints dataset ***d*** to the console and the log.
+ - `FD.print_dataset(d)`: Prints dataset ***d*** to the console and the log.
  
  -`FD.drop(d, variables)`: Removes ***variables*** from dataset ***d***. ***d*** must be a string. ***variables*** must be an array of string variable names.
  
- -`FD.glue(top, bottom)`: Returns concatenation of datasets ***top*** and ***bottom***. Result will be an Array-of-objects. 
+ - `FD.glue(top, bottom)`: Returns concatenation of datasets ***top*** and ***bottom***. Result will be an Array-of-objects. 
  
- -``:
+ - `FD.outer_join(left, right)`: Returns an Array-of-objects including all observations from both **left** and **right** datasets matched on all variables common to both datasets. All variables are retained.
  
- -``:
+ - `FD.inner_join(left, right)`: Returns an Array-of-objects including only matching observations from **left** and **right** datasets. Matching is done on all variables common to both datasets. All variables are retained.
+
  
- -``:
+ - `FD.left_join(left, right)`: Returns an Array-of-objects including only observations from the **left** dataset. Retains all **left** variables and all **right** variables for matching observations.
+
  
- -``:
+ - ``:
  
- -``:
+ - ``:
 
 ### Array Functions
 
@@ -151,38 +153,35 @@ Many of the utilities in this library require assigning data to a ***dataset***,
 - distinct_values():
 - includes_element():
 - includes_property():
-- drop():
-- TODO glue():
-- TODO marry():
 - standardize_structure():
 - save_data():
 
 ### Arithmetic
 
- - sum():
- - product():
- - TODO string_sum():
- - TODO string_product():
- - TODO string_quotient():
+ - `sum(arr, key = null)`:
+ - `product(arr, key = null)`:
+ - **TODO** `string_sum(x, y)`:
+ - **TODO** `string_product(x, y)`:
+ - **TODO** `string_quotient(dividend, divisor)`:
     
 ### Set Operators
 
-- union():
-- intersection():
-- difference():
+- `union(x, y)`: Returns elements found in either array ***x*** or array ***y***.
+- `intersection(x, y)`: Returns elements found in both array ***x*** and in array ***y***.
+- `difference(x, y)`: Returns elements found in array ***x*** but not found in array ***y***.
 
 ### Combinatorics
 
-- factorial():
-- combinations():
-- permutations():
-- subsets():
-- multicombinations():
+- factorial(num): Returns num!, i.e., ***num*** x (***num*** - 1) x (***num*** - 2) ... x (***num*** - (***num*** - 1)) 
+- combinations(n, k):
+- permutations(n, k):
+- subsets(n):
+- multicombinations(n, k):
 
 ### Sorting
 
-- ascending():
-- descending():
+- `ascending()`:
+- `descending()`:
 
 ### Univariate Distributions & Central Tendencies
 
