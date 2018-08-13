@@ -31,7 +31,7 @@ const FD = (function () {
    
    const SETTINGS = {
      DEFAULT_OUTPUT_FORMAT: "js",
-     LOG_NAME: `FD_log_${Log.session}.txt`;
+     LOG_NAME: `FD_log_${Log.session}.txt`
    };
    
    /**
@@ -123,7 +123,14 @@ const FD = (function () {
    * @description Returns number of missing values in Array `arr`.
    * @param {Array} `arr` - The Array in which to search for missing values.
    */
-   const count_missing_values = (arr) => arr.filter(f => includes_element([null, undefined, NaN, ''], f)).length;
+   const count_missing_values = (arr) => arr.filter(f => is_missing(f)).length;
+   
+   
+   /**
+   * @description Returns `true` if `test_value` is missing; otherwise, returns `false`.
+   * @param {} `test_value` - value to test for missingness.
+   */
+   const is_missing = test_value => includes_element([null, undefined, NaN, ''], test_value);
    
    /**
    * @description Returns a metadata object (See below).
@@ -135,13 +142,14 @@ const FD = (function () {
       {"structure":"1d-array"|"2d-array"|"array_of_objects"|"object_of_arrays",
          "valid":true|false,
          "variables": {
-           "name": Name or index,
-           "type":"string"|"integer"|"real"|"boolean"|"mixed",
-           "id": true|false,
-           "missing": # of cases,
-           "nonmissing": # of cases,
-           "display_width": # of characters
-           "valid": true|false
+           "name": {
+             "type":"string"|"integer"|"real"|"boolean"|"mixed",
+             "id": true|false,
+             "missing": # of cases,
+             "nonmissing": # of cases,
+             "display_width": # of characters
+             "valid": true|false
+           }
          }
        } */
       if (!!data) {
@@ -189,7 +197,7 @@ const FD = (function () {
       if (result.meta.structure === "1d_array"){
          /* if `data` is one-dimensional Array,
               map `data` to Array of objects with Key set to index (zero) */
-         result.standard = data.map(m => {0: m});
+         result.standard = data.map(m => {'var0': m});
          o = "FD.standardize_structure(): '1d_array' converted to 'array_of_objects'.";
       }
       else if (result.meta.structure === "2d_array"){
@@ -197,22 +205,22 @@ const FD = (function () {
               iterate over Array `data` (i.e., observations) and over
               inner Array (i.e., variables). Variables names are simply the index */
          result.standard = data.reduce((acc, array) => {
-           array.forEach((item, idx) => acc.push({ idx: item } ));
+           array.forEach((item, idx) => acc.push({ `var${idx}`: item } ));
            return acc;
          },[]);
-         o += "FD.standardize_structure(): '2d_array' converted to 'array_of_objects'.";
+         o = "FD.standardize_structure(): '2d_array' converted to 'array_of_objects'.";
       }
       else if (result.meta.structure === "array_of_objects"){
          /* if `data` is already in target format (Array of Objects),
               copy `data` into result.standard */
          result.standard = [...data];
-         o += "FD.standardize_structure(): data is 'array_of_objects'.";
+         o = "FD.standardize_structure(): data is 'array_of_objects'.";
       }
       else if (result.meta.structure === "object_of_arrays"){
          /* if `data` is Object of Arrays),
               iterate over variables and index copying values to row Object
               for each index with property names copied from variables */
-         let names = result.meta.variables.map(m => m.name);
+         let names = Object.keys(result.meta.variables);
          result.standard = [];
          for (let i = 0; i < data[names[0]].length; i++){
             let row = {};
@@ -221,18 +229,18 @@ const FD = (function () {
             }
             result.standard.push(row);
          }
-         o += "FD.standardize_structure(): 'object_of_arrays' converted to 'array_of_objects'.";
+         o = "FD.standardize_structure(): 'object_of_arrays' converted to 'array_of_objects'.";
       }
       console.log(o);
       update_log(o);
-      return standard.structure;
+      return result.standard.structure;
    }
    
    /**
    * @description Returns true if `thing` is of type String, Number, or Boolean.
    * @param { } `thing` - The value to test.
    */
-   const scalar = thing => (/string|number|boolean/).test(typeof thing);
+   const scalar = test_value => (/string|number|boolean/).test(typeof test_value);
 
    /**
    * @description Returns type (string, integer, real, boolean, mixed) of values in `arr`.
@@ -284,16 +292,17 @@ const FD = (function () {
    * @param {Array} `arr` - The Array of values to probe.
    * @param {String|integer} `name` - The variable name or array index to give to data in `arr`.
    */
-   const test_variable = (arr, name) => {
+   const test_variable = arr => {
       const variable = {};
-      variable.name = name;
+      //variable.name = name;
       variable.missing = count_missing_values(arr);
       variable.nonmissing = arr.length - variable.missing;
       let values = distinct_values(arr);
       variable.distinct = values.length;
       variable.type = detect_type(values);
-      /* If variable is type integer or string and has no missing values, then flag as possible ID */
-      variable.id = ((includes_element(["integer", "string"], variable.type)) && (variable.missing === 0)) ? true : false;
+      /* If variable is type integer or string and has no missing values and no duplicate values,
+           then flag as possible ID */
+      variable.id = ((includes_element(["integer", "string"], variable.type)) && (variable.missing === 0) && (arr.length === values.length)) ? true : false;
       /* Variable flagged as valid if type is string, boolean, integer, or real,
            and has at least one non-null value */
       variable.valid = ((variable.type !== "mixed" ) && (variable.nonmissing > 0)) ? true : false;
@@ -308,45 +317,49 @@ const FD = (function () {
    const test_1d = (arr) => {
       let result = {};
       result.structure = "1d_array";
-      result.variables = [];
-      result.variables.push(test_variable(arr, 0));
-      result.valid = (result.variables[0].valid) ? true : false;
+      result.variables = {};
+      result.variables['var0'] = test_variable(arr);
+      result.valid = (result.variables['var0'].valid) ? true : false;
       return result;
    }
 
    const test_2d = (arr) => {
       let result = {};
       result.structure = '2d_array';
-      result.variables = [];
+      result.variables = {};
+      let vars = Object.keys(result.variables);
       for (let i = 0; i < arr[0].length; i++){
-         result.variables.push(test_variable(arr.map(m => m[i]), i));
+         result.variables[`var${i.toString()}`] = test_variable(arr.map(m => m[i]));
       }
-      result.valid = (result.variables.filter(f => f.valid).length > 0) ? true : false;
+      let vars = Object.keys(result.variables);
+      result.valid = (vars.map(m => result.variables[m].valid).filter(f => f).length > 0) ? true : false;
       return result;
    }
    
-   //TODO fix bug passes bad data to test_variable()
-   const test_array_of_objects = list => {
+   
+   const test_array_of_objects = arr => {
       const result = {};
       result.structure = 'array_of_objects';
-      result.variables = [];
-      const props = Object.keys(list[0]);
+      result.variables = {};
+      const props = Object.keys(arr[0]);
       for (let i = 0; i < props.length; i++){
-         result.variables.push(test_variable(list.map(m => m[props[i]]), props[i]));
+         result.variables[props[i]] = test_variable(list.map(m => m[props[i]]));
       }
-      result.valid = (result.variables.filter(f => f.valid).length > 0) ? true : false;
+      let vars = Object.keys(result.variables);
+      result.valid = (vars.map(m => result.variables[m].valid).filter(f => f).length > 0) ? true : false;
       return result;
    }
 
    const test_object_of_arrays = list => {
       const result = {};
       result.structure = 'object_of_arrays';
-      result.variables = [];
+      result.variables = {};
       const props = Object.keys(list);
       for (let i = 0; i < props.length; i++){
-         result.variables.push(test_variable(list[props[i]], props[i]));
+         result.variables[props[i]] = test_variable(list[props[i]]);
       }
-      result.valid = (result.variables.filter(f => f.valid).length > 0) ? true : false;
+      let vars = Object.keys(result.variables);
+      result.valid = (vars.map(m => result.variables[m].valid).filter(f => f).length > 0) ? true : false;
       return result;
    }
    
@@ -449,17 +462,19 @@ const FD = (function () {
    * it will be converted to one.
    */
    const dataset = (name, d) => {
-      let o = "";
+      let o;
       if (!name){
         /* If `name` is null, return names of datasets in Stash */
         o = `FD.dataset(): Available datasets: ${Object.keys(Stash).join(", ")}\n\n`;
+        console.log(o);
+        update_log(o);
         return Object.keys(Stash);
       }
       else {
         if (includes_element(Object.keys(Stash), name)){
           /* Print wanring to console and session log if dataset 'name' already exists. */
           console.warn(`FD.dataset(): Overwriting existing dataset '${name}'.`);
-          o = `FD.dataset(): overwriting existing dataset '${name}'.\n`;
+          o = `FD.dataset(): Warning: Overwriting existing dataset '${name}'.\n\n`;
         }
         let meta = metadata(d);
         if (meta.valid) {
@@ -484,7 +499,7 @@ const FD = (function () {
    }
    
    /**
-   * @description Return dataset with name `name`.
+   * @description Return dataset with name = `name`.
    * @param {string} `name` - Name of target dataset.
    */
    const extract = name => Stash[name].standardized;
@@ -495,13 +510,14 @@ const FD = (function () {
    * @param {String} `variable` - Name of target variable in dataset `name`.
    */
    const declare_id = (name, variable) => {
-     let o = "";
+     let o;
      try {
        Stash[d].metadata.variables[variable].id = true;
        o = `FD.declare_id(): ID variable '${name}[${variable}]' declared.`;
+       console.log(o);
      } catch (error){
        o = `FD.declare_id(): Could not declare '${name}[${variable}]' as ID variable.`;
-       throw new Error(`FD.declare_id(): Could not declare '${name}[${variable}]' as ID variable.`);
+       throw new Error(o);
      }
      update_log(o);
    }
@@ -514,11 +530,12 @@ const FD = (function () {
    const undeclare_id = (name, variable) => {
      let o = "";
      try {
-       Stash[d].metadata.variables[variable].id = false;
-       o = "FD.undeclare_id(): variable " + d + "[" + variable + "] undeclared an ID.";
+       Stash[name].metadata.variables[variable].id = false;
+       o = `FD.undeclare_id(): variable '${name}[${variable}]' undeclared an ID.\n\n`;
+       console.log(o);
      } catch (error){
-       o = "FD.declare_id(): Could not undeclare " + d + "[" + variable + "] as ID variable.";
-       throw new Error("FD.undeclare_id(): Could not undeclare " + d + "[" + variable + "] as ID variable.");
+       o = `FD.declare_id(): Could not undeclare '${name}[${variable}]' as ID variable.\n\n`;
+       throw new Error(o);
      }
      update_log(o);
    }
@@ -530,7 +547,7 @@ const FD = (function () {
    */
    const common_variabes = (name1, name2) => {
       let common = [];
-      let vars1 = Stash[name1].metadata.variables.map(m => m.name);
+      let vars1 = Object.keys(Stash[name1].metadata.variables);
       let vars2 = Stash[name2].metadata.variables.map(m => m.name);
       for (let i = 0; i < vars1.length; i++){
          if (includes_element(vars2, var1[i])) common.push(vars1[i]);
@@ -734,7 +751,7 @@ const FD = (function () {
    * @param {String} `filename` - The file name, including file extension, of the downloaded dataset
    * Valid output formats: .js, .json, .csv, .tsv, .json, .R, or .py.
    */
-   const save_data = (name, file_name) => {
+   const save_dataset = (name, file_name) => {
       let file_format = file_name.split(".")[1];
       let mime;
       let o = "FD.save_data(): ";
