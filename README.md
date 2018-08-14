@@ -92,6 +92,8 @@ Many of the functions in this library require first assigning data to a ***datas
  
  - `FD.undeclare_id(name, variable)`: Sets metatdata ID flag on `variable` to `false`. `name` refers to the target dataset.
  
+ - `FD.rename(name, old_name, new_name)`: Changes name of target variable in dataset `name` from `old_name` to `new_name`.
+ 
  - `FD.common_variables(name1, name2)`: Returns an array of variable names common to both datasets `name1` and `name2`.
  
  - `FD.print_dataset(name)`: Pretty-prints dataset `name` to the console and the session log.
@@ -102,9 +104,9 @@ Many of the functions in this library require first assigning data to a ***datas
  
  - `FD.glue(name1, name2)`: Returns concatenation of datasets `name1` and `name2`. Result (as usual) will be an Array-of-objects.
  
- - `FD.inner_join(name1, name2)`: Returns an Array-of-objects including only matching observations from datasets `name1` and `name2`. Matching is done on all variables common to both datasets. All variables will be retained.
+ - `FD.inner_join(name1, name2)`: Returns an Array-of-objects including only matching observations from datasets `name1` and `name2`. Matching is done on all variables common to both datasets. Duplicate observations are possible. All variables are retained.
 
- - `FD.left_join(name1, name2)`: Returns an Array-of-objects including only observations from the dataset `name1` and matching observations from dataset `name2`. Retains all variables.
+ - `FD.left_join(name1, name2)`: Returns an Array-of-objects including only observations from the dataset `name1` and, if a match or matches exists, matching observations from dataset `name2`. All variables are retained.
 
  - `FD.includes_element(arr, element)`: Returns `true` if `element` is found in `arr`, which may be an Array or a String; otherwise returns false.
  
