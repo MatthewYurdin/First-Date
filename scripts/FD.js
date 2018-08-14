@@ -2,9 +2,7 @@ const FD = (function () {
    
    "use strict";
    
-   const SETTINGS = {DEFAULT_OUTPUT_FORMAT: "js"};
-
-   // NAME & ID GENERATION ------------------------------------------- //
+   // --------------------------NAME & ID GENERATION --------------------------------- //
    
    /**
    * @description Generate unique ID string.
@@ -20,14 +18,15 @@ const FD = (function () {
       return id;
    }
 
-   // LOG MANAGEMENT ---------------------------------------------------- //
+   // ---------------------------LOG MANAGEMENT ------------------------------------- //
 
   
    const Log = {
      initialized: new Date(),
-     session: generate_id(9),
-     text: `FD.js (session ${Log.session}) initialized ${Log.initialized.toString()}.\n`
+     session: generate_id(9)
    };
+   
+   Log.text = `FD.js (session '${Log.session}') initialized ${Log.initialized.toString()}.\n`;
    
    const SETTINGS = {
      DEFAULT_OUTPUT_FORMAT: "js",
@@ -89,7 +88,7 @@ const FD = (function () {
       update_log("User downloaded a copy of the log as 'session_log_" + Log.session + ".txt'");
    }
    
-   // ARRAY FUNCTIONS ---------------------------------------------------- //
+   // -------------------------------ARRAY FUNCTIONS --------------------------------------- //
    
    /**
    * @description Returns true if `element` is in `list`.
@@ -164,6 +163,7 @@ const FD = (function () {
               evaluate `data` as Array of Objects */
             else if (typeof test_value === "object"){
                result = test_array_of_objects(data);
+               //console.log(`result from test_array_of_objects(): ${JSON.stringify(result)}`);
             }
             else {
               /* else if `data` is Array,
@@ -175,6 +175,7 @@ const FD = (function () {
            /* if `data` is NOT Array,
               evaluate `data` as Object of Arrays */
            result = test_object_of_arrays(data);
+           //console.log(`result from test_object_of_arrays(): ${JSON.stringify(result)}`);
          }
          /* if `data` classified as one of four valid structures,
               return metadata Object */
@@ -197,17 +198,25 @@ const FD = (function () {
       if (result.meta.structure === "1d_array"){
          /* if `data` is one-dimensional Array,
               map `data` to Array of objects with Key set to index (zero) */
-         result.standard = data.map(m => {'var0': m});
+         result.standard = data.map(m => {
+           let result = {};
+           result['var0'] = m;
+           return result;
+         });
          o = "FD.standardize_structure(): '1d_array' converted to 'array_of_objects'.";
       }
       else if (result.meta.structure === "2d_array"){
          /* if `data` is two-dimensional Array AND first element is Array,
               iterate over Array `data` (i.e., observations) and over
               inner Array (i.e., variables). Variables names are simply the index */
-         result.standard = data.reduce((acc, array) => {
-           array.forEach((item, idx) => acc.push({ `var${idx}`: item } ));
-           return acc;
-         },[]);
+         result.standard = [];
+         for (let i = 0; i < data.length; i++){
+           let row = {};
+           for (let j = 0; j < data[i].length; j++){
+             row[`var${j}`] = data[i][j];
+           }
+           result.standard.push(row);
+         }
          o = "FD.standardize_structure(): '2d_array' converted to 'array_of_objects'.";
       }
       else if (result.meta.structure === "array_of_objects"){
@@ -233,7 +242,7 @@ const FD = (function () {
       }
       console.log(o);
       update_log(o);
-      return result.standard.structure;
+      return result.standard;
    }
    
    /**
@@ -308,7 +317,7 @@ const FD = (function () {
       variable.valid = ((variable.type !== "mixed" ) && (variable.nonmissing > 0)) ? true : false;
       /* Each variable assigned a display size as greater of variable name length and
           maximum length of individual values and variable name */
-      display_widths = arr.map(m => (m === null) ? 1 : m.toString().length);
+      let display_widths = arr.map(m => (m === null) ? 1 : m.toString().length);
       display_widths.push(name.toString().length);
       variable.display_size = display_widths.sort(descending)[0];
       return variable;
@@ -331,7 +340,6 @@ const FD = (function () {
       for (let i = 0; i < arr[0].length; i++){
          result.variables[`var${i.toString()}`] = test_variable(arr.map(m => m[i]));
       }
-      let vars = Object.keys(result.variables);
       result.valid = (vars.map(m => result.variables[m].valid).filter(f => f).length > 0) ? true : false;
       return result;
    }
@@ -343,7 +351,7 @@ const FD = (function () {
       result.variables = {};
       const props = Object.keys(arr[0]);
       for (let i = 0; i < props.length; i++){
-         result.variables[props[i]] = test_variable(list.map(m => m[props[i]]));
+         result.variables[props[i]] = test_variable(arr.map(m => m[props[i]]));
       }
       let vars = Object.keys(result.variables);
       result.valid = (vars.map(m => result.variables[m].valid).filter(f => f).length > 0) ? true : false;
@@ -442,7 +450,7 @@ const FD = (function () {
       return dummy;
    };
    
-   // ---------------------------- DATASET FUNCTIONS --------------------------------------- //
+   // ---------------------------- DATASET FUNCTIONS ---------------------------------- //
    
    /* There are four valid input data structures:
         1. Object of arrays...{"label":[1,2,3,4,5],"age":[6,7,8,9,0]}
@@ -454,7 +462,7 @@ const FD = (function () {
    const Stash = {};//'Stash' is a container for datasets and metadata
    
    /**
-   * @description Assigns data `d` to a dataset Stash as Stash[`name`].standardized.
+   * @description Assigns data `d` to a dataset Stash as Stash[`name`].standard.
    * If no name is given, returns an array of existing datasets.
    * @param {String} `name` - The property name in Stash given to the dataset.
    * @param {Array|Object} `d` - The actual data to assign to a dataset. Must be one-dimensional array,
@@ -478,14 +486,17 @@ const FD = (function () {
         }
         let meta = metadata(d);
         if (meta.valid) {
-          /* If dataset is valid, assign standardized version to Stash[name].standardized
+          Stash[name] = {};
+          /* If dataset is valid, assign standard version to Stash[name].standard
                and metadata to Stash[name].metadata */
           if (meta.structure === "array_of_objects"){
-            Stash[name] = {"standardized": d, "metadata": meta};
+            Stash[name] = {"standard": [...d], "metadata": meta};
           } else {
             /* convert data to an 'array_of_objects' structure */
-            Stash[name].standardized = standardize_structure(d);
-            Stash[name].metadata = metadata(Stash[name].standardized);
+            /* TODO why is this not populating standard */
+            Stash[name].standard = standardize_structure(d);
+            meta.structure = 'array_of_objects';
+            Stash[name].metadata = meta;
           }
           o = `${o}FD.dataset(): dataset '${name}' created with metadata:\n\n${JSON.stringify(meta)}\n\n`;
         }
@@ -502,7 +513,14 @@ const FD = (function () {
    * @description Return dataset with name = `name`.
    * @param {string} `name` - Name of target dataset.
    */
-   const extract = name => Stash[name].standardized;
+   const extract = (name) => {
+     const exists = (includes_element(Object.keys(Stash), name)) ? "dataset exists" : "dataset does not exist";
+     console.log(`FD.extract(): ${exists}`);
+     if (exists) {
+       return Stash[name];
+     }
+     console.log(`There is no dataset named ${name}`);
+   }
    
    /**
    * @description Marks `variable` in dataset `name` as an ID.
@@ -541,18 +559,42 @@ const FD = (function () {
    }
    
    /**
+   * @description Chamges name of variable from `old_name` to 'new_name' in dataset `name`.
+   * @param {String} `name` - Name of target dataset.
+   * @param {String} `old_name` - Current name of target variable in dataset `name`.
+   * @param {String} `new_name` - New name of target variable in dataset `name`.
+   */
+   const rename_variable = (name, old_name, new_name) => {
+     let o;
+     try {
+       /* Add new_name as propert to each observation in 'standard' */
+       for (let i = 0; i < Stash[name].standard.length; i++){
+         Stash[name].standard[i][new_name] = Stash[name].standard[i][old_name];
+       }
+       /* drop() will delete old_name from each observation in 'standard' and recalculate metadata */
+       drop(name, [old_name]);
+       o = `FD.rename_variable(): variable '${name}[${old_name}]' renamed '${name}[${new_name}]'.\n\n`;
+       console.log(o);
+     } catch (error){
+       o = `FD.rename_variable(): Could not rename '${name}[${old_name}]'.\n\n`;
+       console.log(o);
+     }
+     update_log(o);
+   }
+   
+   /**
    * @description Finds variables common to two datasets.
    * @param {string}  name1 - name of first dataset.
    * @param {string}  name2 - name of second dataset.
    */
-   const common_variabes = (name1, name2) => {
+   const common_variables = (name1, name2) => {
       let common = [];
       let vars1 = Object.keys(Stash[name1].metadata.variables);
-      let vars2 = Stash[name2].metadata.variables.map(m => m.name);
+      let vars2 = Object.keys(Stash[name2].metadata.variables);
       for (let i = 0; i < vars1.length; i++){
-         if (includes_element(vars2, var1[i])) common.push(vars1[i]);
+         if (includes_element(vars2, vars1[i])) common.push(vars1[i]);
       }
-      let o = `FD.common_variables(): Variables in both datasets '${d1}' and '${d2}': ${common.join(", ")}`;
+      let o = `FD.common_variables(): Variables in both datasets '${name1}' and '${name2}': ${common.join(", ")}`;
       console.log(o);
       update_log(o);
       return common;
@@ -563,7 +605,7 @@ const FD = (function () {
    * @param {String} `name` - name of target dataset.
    */
    const print_dataset = (name) => {
-      let o = `FD.print_dataset(): Dataset '${name} (${Stash[d].standardized.length} rows):\n\n${ print_text(Stash[d].standardized, "\t")}`;
+      let o = `FD.print_dataset(): Dataset '${name} (${Stash[d].standard.length} rows):\n\n${ print_text(Stash[d].standard, "\t")}`;
       console.log(msg);
       update_log(o);
    }
@@ -574,12 +616,12 @@ const FD = (function () {
    * @param {Array} `variables` - Array of names of target variables in dataset `name`.
    */
    const drop = (d, variables = []) => {
-      for (let i = 0; i < Stash[d].standardized.length; i++){
+      for (let i = 0; i < Stash[d].standard.length; i++){
          for (let j = 0; j < variables.length; j++){
-            Stash[d].standardized[i].delete(variables[j]);
+            delete Stash[d].standard[i][variables[j]];
          }
       }
-      Stash[d].metadata = metadata(Stash[d].standardized);
+      Stash[d].metadata = metadata(Stash[d].standard);
       let o = `FD.drop(): variables [${variables.join(", ")}] dropped from dataset '${d}'.`;
       console.log(o);
       update_log(o);
@@ -594,62 +636,65 @@ const FD = (function () {
    *
    */
    const glue = (name1, name2) => {
-      let result = [], common = common_variables(name1, name2);
+      let result = [];
+      let common = common_variables(name1, name2);
       /* Retain common variables from dataset `name1` */
-      for (let i = 0; i < Stash[name1].standardized.length; i++){
+      for (let i = 0; i < Stash[name1].standard.length; i++){
          let row = {};
          for (let j = 0; j < common.length; j++){
-            row[common[j] = Stash[name1].standardized[i][common[j]]);
+            row[common[j]] = Stash[name1].standard[i][common[j]];
          }
          result.push(row);
       }
       /* Retain common variables from dataset `name2` */
-      for (let i = 0; i < Stash[name2].standardized.length; i++){
+      for (let i = 0; i < Stash[name2].standard.length; i++){
          let row = {};
          for (let j = 0; j < common.length; j++){
-            row[common[j] = Stash[name2].standardized[i][common[j]]);
+            row[common[j]] = Stash[name2].standard[i][common[j]];
          }
          result.push(row);
       }
-      let o = `FD.glue(): combined dataset {top} and {bottom}, including variables [${common.join(", "}].`;
+      let o = `FD.glue(): combined datasets '${name1}' and '${name2}', including variables [${common.join(", ")}].`;
       console.log(o);
       update_log(o);
       return result;
    }
    
-   /**
-   * Returns new array-of-objects from datasets `name1` and `name2`. Result will contain
-   * all rows from `name1` and from `name2`. Only common variables will be retained.
-   * @param {String} `name1` - name of first dataset.
-   * @param {String} `name2` - name of second dataset.
-   *
-   */
-   const outer_join = (name1, name2) => {
-      for (let i = 0; i < Stash[d].standardized.length; i++){
-         for (let j = 0; j < variables.length; j++){
-            Stash[d].standardized[i].delete(variables[j]);
-         }
-      }
-      Stash[d].metadata = metadata(Stash[d].standardized);
-      let o = "FD.left_join(): combined dataset {top} and {bottom}, including variables [" + variables.join(", ") + "].";
-      console.log(o);
-      update_log(Date.now(), o);
-      return true;
-   }
    
    /**
    * Returns new array-of-objects from datasets `name1` and `name2`. Result will contain
    * all rows from `name1` including `name2` variables for matching rows.
    * @param {String} `name1` - name of first dataset.
    * @param {String} `name2` - name of second dataset.
-   *
    */
    const left_join = (name1, name2) => {
       let result = [];
-      for (let i = 0; i < Stash[name1].standardized.length; i++){
-         
+      const stringify = (variables, obs) => variables.map(m => (is_missing(obs[m])) ? "NA" : obs[m]).join('~');
+      let right_vars = Object.keys(Stash[name2].metadata.variables);
+      let c = common_variables(name1, name2);
+      for (let i = 0; i < Stash[name1].standard.length; i++){
+        let match_count = 0;
+        let m1 = stringify(c, Stash[name1].standard[i]);
+        for (let j = 0; j < Stash[name2].standard.length; j++){
+          let m2 = stringify(c, Stash[name2].standard[j]);
+          /* If two observations match, add name2 to name1 */
+          if (m1 === m2){
+            match_count++;
+            let combine = Object.assign(Stash[name1].standard[i], Stash[name2].standard[j]);
+            result.push(combine);
+          }
+        }
+        /* if left observation yielded zero matches,
+             add null values for right-only variables */
+        if (match_count === 0){
+          let left_only = Stash[name1].standard[i];
+          for (let k = 0; k < right_vars.length; k++){
+            if (!left_only.hasOwnProperty(right_vars[k])) left_only[right_vars[k]] = null;
+          }
+          result.push(left_only);
+        }
       }
-      let o = `FD.left_join(): combined dataset '${name1}' and '${name2}', including variables: ${variables.join(", ")}.`;
+      let o = `FD.left_join(): combined dataset '${name1}' and '${name2}' matching on: ${c.join(", ")}.`;
       console.log(o);
       update_log(o);
       return result;
@@ -663,9 +708,25 @@ const FD = (function () {
    */
    const inner_join = (name1, name2) => {
       let result = [];
-      let o = `FD.left_join(): combined dataset '${name1}' and '${name2}', including variables: ${variables.join(", ")}.`;
+      const stringify = (variables, obs) => variables.map(m => (is_missing(obs[m])) ? "NA" : obs[m]).join('~');
+      let right_vars = Object.keys(Stash[name2].metadata.variables);
+      let c = common_variables(name1, name2);
+      for (let i = 0; i < Stash[name1].standard.length; i++){
+        let match_count = 0;
+        let m1 = stringify(c, Stash[name1].standard[i]);
+        for (let j = 0; j < Stash[name2].standard.length; j++){
+          let m2 = stringify(c, Stash[name2].standard[j]);
+          /* If two observations match, add name2 to name1 */
+          if (m1 === m2){
+            match_count++;
+            let combine = Object.assign(Stash[name1].standard[i], Stash[name2].standard[j]);
+            result.push(combine);
+          }
+        }
+      }
+      let o = `FD.inner_join(): combined dataset '${name1}' and '${name2}' matching on: ${c.join(", ")}.`;
       console.log(o);
-      update_log(Date.now(), o);
+      update_log(o);
       return result;
    }
    
@@ -676,11 +737,11 @@ const FD = (function () {
    */
    const shuffle = name => {
       let i = 0, j = 0, temp = null
-      for (i = Stash[name].standardized.length - 1; i > 0; i -= 1) {
+      for (i = Stash[name].standard.length - 1; i > 0; i -= 1) {
          j = Math.floor(Math.random() * (i + 1))
-         temp = Stash[name].standardized[i];
-         Stash[name].standardized[i] = Stash[d].standardized[j];
-         Stash[name].standardized[j] = temp;
+         temp = Stash[name].standard[i];
+         Stash[name].standard[i] = Stash[d].standard[j];
+         Stash[name].standard[j] = temp;
       }
       let o = `FD.shuffle(): shuffled dataset '${name}'.`;
       console.log(o);
@@ -694,7 +755,7 @@ const FD = (function () {
    * @param {Number} `n` - The number of cases to select.
    */
    const random_sample = (name, n) => {
-      let frame = [...Stash[name].standardized];
+      let frame = [...Stash[name].standard];
       shuffle(frame);
       let o = `FD.random_sample(): selected ${n} from dataset '${name}'.`;
       console.log(o);
@@ -735,9 +796,9 @@ const FD = (function () {
          result += (i < (variables.length - 1)) ? delim : '';
      }
      result += "\n";
-     for (let i = 0; i < Stash[d].standardized.length; i++){
+     for (let i = 0; i < Stash[d].standard.length; i++){
          for (let j = 0; j < variables.length; j++){
-            result += add_spaces(Stash[d].standardized[i][j], widths[j]);
+            result += add_spaces(Stash[d].standard[i][j], widths[j]);
             result += (j < (variables.length - 1)) ? delim : '';
          }
          result += "\n";
@@ -757,27 +818,27 @@ const FD = (function () {
       let o = "FD.save_data(): ";
       if (file_format === 'json') {
             mime = 'text/json';
-            dataset = JSON.stringify(Stash[name].standardized);
+            dataset = JSON.stringify(Stash[name].standard);
       }
       else if (file_format === 'js') {
             mime = 'text/javascript';
-            dataset = 'let ' + file_name.split(".")[0] + ' = ' + JSON.stringify(Stash[name].standardized) + ';';
+            dataset = 'let ' + file_name.split(".")[0] + ' = ' + JSON.stringify(Stash[name].standard) + ';';
       }
       else if (file_format === 'csv'){
             mime = 'text/csv';
-            dataset = print_text2(Stash[name].standardized), ",");
+            dataset = print_text2(Stash[name].standard, ",");
       }
       else if (file_format === 'tsv'){
             mime = 'text/tab-separated-values';
-            dataset = print_text2(Stash[name].standardized, "   ");
+            dataset = print_text2(Stash[name].standard, "   ");
       }
       else if (file_format === 'R') {
             mime = 'text/x-r';
-            dataset = print_r(Stash[name].standardized, file_name.split(".")[0]);
+            dataset = print_r(Stash[name].standard, file_name.split(".")[0]);
       }
       else if (file_format === 'py') {
             mime = 'text/x-python';
-            dataset = print_py(Stash[name].standardized, file_name.split(".")[0]);
+            dataset = print_py(Stash[name].standard, file_name.split(".")[0]);
       }
       else {
             throw new Error('save_data(): Valid output formats are ".js", ".json", ".csv", ".tsv", ".R", or ".py".');
@@ -845,11 +906,11 @@ const FD = (function () {
             return value;
          }
       }
-      let result = "#Remember to set working directory\nsetwd()\n" + name + " <- data.frame(";
+      let result = `#Remember to set working directory\nsetwd()\n${name} <- data.frame("`;
       const types = {"real": "numeric", "integer": "numeric", "string":"character", "mixed":"character", "boolean":"logical"};
       let vars = d.meta.variables.map(m => [m.name, m.type]);
       for (let i = 0; i < vars.length; i++){
-         result += vars[i][0] + " = " + types[vars[i][1]] + "(" + Stash[d].standardized.length + ")";
+         result += vars[i][0] + " = " + types[vars[i][1]] + "(" + Stash[d].standard.length + ")";
          if (i < (vars.length-1)){
             result += ", ";
          }
@@ -857,9 +918,9 @@ const FD = (function () {
       }
       for (let i = 0; i < vars.length; i++){
          result += name + "$" + vars[i][0] + " <- c(";
-         for (let j = 0; j < Stash[d].standardized.length; j++){
-            result += r_convert(types[vars[i][1]], Stash[d].standardized[j][i]);
-            if (j < (Stash[d].standardized.length - 1)) {
+         for (let j = 0; j < Stash[d].standard.length; j++){
+            result += r_convert(types[vars[i][1]], Stash[d].standard[j][i]);
+            if (j < (Stash[d].standard.length - 1)) {
                result += ", ";
             }
          }
@@ -894,9 +955,9 @@ const FD = (function () {
       let vars = d.meta.variables.map(m => [m.name,m.type]);
       for (let i = 0; i < vars.length; i++){
          result += ("'" + vars[i][0] + "': [");
-         for (let j = 0; j < Stash[d].standardized.length; j++){
-            result += py_convert(types[vars[i][1]], Stash[d].standardized[j][i]);
-            if (j < (Stash[d].standardized.length - 1)) {
+         for (let j = 0; j < Stash[d].standard.length; j++){
+            result += py_convert(types[vars[i][1]], Stash[d].standard[j][i]);
+            if (j < (Stash[d].standard.length - 1)) {
                result += ", ";
             }
             else {
@@ -914,7 +975,7 @@ const FD = (function () {
    }
 
    
-   // COMBINATORICS ------------------------------------------------ //
+   // --------------------------------- COMBINATORICS ---------------------------------------- //
 
    /**
    * Returns the factorial of {num}.
@@ -971,7 +1032,7 @@ const FD = (function () {
    const permutations = (n, k) => factorial(n) / factorial(n - k);
 
 
-   // ARITHMETIC ------------------------------------------------ //
+   // ----------------------------------------- ARITHMETIC ----------------------------------------- //
 
    /**
    * Returns the sum of values in {array} or {array[key]}.
@@ -1000,7 +1061,7 @@ const FD = (function () {
    }
    
    
-   // SET OPERATORS ----------------------------------------------------------- //
+   // -------------------------------------------- SET OPERATORS ---------------------------------------------- //
 
    /**
    * Returns an array of unique values found in either array {x} or array {y}.
@@ -1036,11 +1097,11 @@ const FD = (function () {
       
       // ARRAY FUNCTIONS
       
-      ascending, descending, random_element, dummy_array, includes_element, includes_property, distinct_values, count_missing_values, metadata, standardize_structure,
+      ascending, descending, random_element, dummy_array, includes_element, includes_property, distinct_values, is_missing, count_missing_values, metadata, standardize_structure,
       
       // DATASET FUNCTIONS
       
-      dataset, data, print_data, save_data, shuffle, random_sample, drop,
+      dataset, extract, print_dataset, save_dataset, shuffle, random_sample, drop, common_variables, rename_variable, glue, inner_join, left_join,
       
       // COMBINATORICS
       
