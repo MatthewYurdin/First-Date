@@ -978,7 +978,7 @@ const FD = (function () {
    // --------------------------------- COMBINATORICS ---------------------------------------- //
 
    /**
-   * Returns the factorial of {num}.
+   * @description Returns the factorial of {num}.
    * @param {number} num - Must be less than 40.
    */
    const factorial = num => {
@@ -1004,7 +1004,8 @@ const FD = (function () {
    }
 
    /**
-   * Returns the the number of different combinations of {k} items that can be chosen from {n} total items.
+   * @description Returns the the number of different combinations of {k} items that can be chosen from {n} total
+   * items.
    * @param {number} n - The number of items to choose from.
    * @param {number} k - The number of items to choose
    */
@@ -1012,20 +1013,21 @@ const FD = (function () {
    const combinations = (n, k) => factorial(n) / (factorial(k) * factorial(n - k));
 
    /**
-   * Returns the the number of different combinations of {k} not-necessarily-unique items that can be chosen from {n} total items.
+   * @description Returns the the number of different combinations of {k} not-necessarily-unique items that can be chosen from {n} total items.
    * @param {number} n - The number of items to choose from.
    * @param {number} k - The number of items to choose
    */
    const multicombinations = (n, k) => combinations((n + k - 1), k);
 
    /**
-   * Returns the the number of possible subsets of any length that can be chosen from {n} total items.
+   * @description Returns the the number of possible subsets of any length that can be chosen from {n} total items.
    * @param {number} n - The total number of items to choose from.
    */
    const subsets = n => Math.pow(2, n);
 
    /**
-   * Returns the the number of different permutations of {k} items that can be chosen from {n} total items.
+   * @description Returns the the number of different permutations of {k} items that can be chosen from {n} total
+   * items.
    * @param {number} n - The number of items to choose from.
    * @param {number} k - The number of items to choose
    */
@@ -1035,27 +1037,25 @@ const FD = (function () {
    // ----------------------------------------- ARITHMETIC ----------------------------------------- //
 
    /**
-   * Returns the sum of values in {array} or {array[key]}.
-   * @param {array} arr - May be 1d_array, a 2d_array with {key} equal to index, an array_of_objects with {key} equal to the target property.
-   * @param {string|index} key - Optional. The target index of a 2d_array or the target property name of an array_of_objects
+   * @description Returns the sum of values in `array` or `array[key]`.
+   * @param {array} arr - 1d_array
    */
-   const sum = (arr, key = null) => {
+   const sum = (arr) => {
       let value = 0;
       for (let a = 0; a < arr.length; a++ ){
-         value += (!!key) ? arr[a][key] : arr[a];
+         value += arr[a];
       }
       return value;
    }
 
    /**
-   * Returns the product of values in {array} or {array[key]}.
-   * @param {array} arr - May be 1d_array, a 2d_array with {key} equal to index, an array_of_objects with {key} equal to the target property.
-   * @param {string|index} key - Optional. The target index of a 2d_array or the target property name of an array_of_objects
+   * @description Returns the product of values in {array} or {array[key]}.
+   * @param {array} `arr` - 1d_array
    */
-   const product = (arr, key = null) => {
-      let value = 0;
-      for (let a = 0; a < list.length; a++){
-         value *= (!!key) ? arr[a][key] : arr[a];
+   const product = (arr) => {
+      let value = 1;
+      for (let a = 0; a < arr.length; a++){
+         value = value * arr[a];
       }
       return value;
    }
@@ -1064,27 +1064,128 @@ const FD = (function () {
    // -------------------------------------------- SET OPERATORS ---------------------------------------------- //
 
    /**
-   * Returns an array of unique values found in either array {x} or array {y}.
+   * @description Returns an array of unique values found in either array {x} or array {y}.
    * @param {array} x - a 1d array.
    * @param {array} y - a 1d array.
    */
    const union = (x, y) => distinct_values(glue(x, y));
 
    /**
-   * Returns an array of unique values found in both array {x} and array {y}.
+   * @description Returns an array of unique values found in both array {x} and array {y}.
    * @param {array} x - a 1d array.
    * @param {array} y - a 1d array.
    */
    const intersection = (x, y) => union(x, y).filter(f => ((includes_element(x, f)) && (includes_element(y, f))));
 
    /**
-   * Returns an array of unique values found only in array {x} or only in array {y}.
+   * @description Returns an array of unique values found only in array {x} or only in array {y}.
    * @param {array} x - a 1d array.
    * @param {array} y - a 1d array.
    */
    const difference = ( x, y ) => {
       const inter = intersection( x, y );
       return union(x, y).filter(f => includes_element(inter, f) === false);
+   }
+   
+   
+   
+   /**
+   * @description Returns the minimum value and the index or indices with the value
+   * @param {Array} `arr` - a 1d array.
+   */
+   const min = (arr) => arr.sort(ascending)[0];
+   
+   /**
+   * @description Returns the maximum value and the index or indices with the value
+   * @param {Array} `arr` - a 1d array.
+   */
+   const max = (arr) => arr.sort(descending)[0];
+   
+   /**
+   * @description Returns the modal value(s) of Array `arr`.
+   * @param {Array} `arr` - a 1d array.
+   */
+   const mode = (arr) => {
+     let counter = {}, mode = [], max = 0;
+     for (let i in arr) {
+       if (!(arr[i] in counter))
+         counter[arr[i]] = 0;
+       counter[arr[i]]++;
+       if (counter[arr[i]] == max)
+         mode.push(arr[i]);
+       else if (counter[arr[i]] > max) {
+         max = counter[arr[i]];
+         mode = [arr[i]];
+       }
+     }
+     return mode;
+   }
+   
+   const median = arr => {
+     if (!!arr.length) {
+       arr.sort(ascending);
+       const mid = Math.floor(arr.length / 2);
+       /* If arr.length is odd, assign middle value */
+       if ((arr.length % 2) == 1) return arr[mid];
+       /* Otherwise assign halfway between two middle values */
+       else return (arr[mid - 1] + arr[mid]) / 2;
+     }
+   }
+   
+   const arithmetic_mean = (arr) => (!!arr.length) ? sum(arr) / arr.length : NaN;
+   
+   const geometric_mean = (arr) => (!!arr.length) ? Math.pow(product(arr), (1 / arr.length)) : NaN;
+   
+   const harmonic_mean = (arr) => (!!arr.length) ? arr.length / sum(arr.map(m => 1 / m)) : NaN;
+   
+   /**
+   * @description Print a stem-and-leaf plot to console and session log
+   * @param `arr` - Variable of type integer or real.
+   * @param `extra_text` - ?.
+   */
+   //TODO fix base alignment
+   const stemplot = (arr, extra_text = '') => {
+     const format = (maximum, base, x) => {
+       let result = '';
+       let max_length = (Math.floor(maximum/base)).toString().length;
+       let x_length = (Math.floor(x/base)).toString().length;
+       console.log("max length: " + max_length + "/ x length: " + x_length);
+       if ((max_length - x_length) === 0){
+         return x.toString();
+       }
+       else if ((max_length - x_length) === 1){
+         return ("_" + x.toString());
+       }
+       else if ((max_length - x_length) === 2){
+         return ("__" +  x.toString());
+       }
+     }
+     let minimum = min(arr);
+     let maximum = max(arr);
+     let range = maximum - minimum;
+     let possible = [0.01, 0.1, 1, 10, 100, 1000, 10000];
+     let base = null;
+     for (let i = 0; i < possible.length; i++){
+       if ((range / possible[i]) > 7){
+         if ((range / possible[i] ) < 50){
+           base = possible[i];
+         }
+       }
+     }
+     if (!!base){
+       let text = `\n\n${extra_text}\nStem-and-Leaf Plot (Base = ${base})\n\n`;
+       for (let j = Math.floor(minimum/base); j <= Math.floor(maximum/base); j++){
+         let row = [];
+         text = `${text}${format(maximum, base, j)}|`;
+         text = `${text}${arr.filter(f => Math.floor(f/base) === j).map(m => m % base).sort(ascending).join('')}\n`;
+       }
+       update_log(text);
+       console.log(text);
+       return true;
+     }
+     let o = "stemplot(): Data is ill-formed for Stem-and-Leaf Plot."
+     update_log(o);
+     console.log(o);
    }
 
    // EXPORT FUNCTIONS
@@ -1117,7 +1218,9 @@ const FD = (function () {
       
       // RANDOMNESS
       
-      random_int, random_real, coin_flip, plus_or_minus
+      random_int, random_real, coin_flip, plus_or_minus,
+      
+      min, max, mode, median, arithmetic_mean, geometric_mean, harmonic_mean, stemplot
       
    };
    
