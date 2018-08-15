@@ -180,15 +180,19 @@ Many of the functions in this library require first assigning data to a ***datas
 
 ### Univariate Distributions & Central Tendencies
 
-- **TODO** `FD.min(name, variable)`: Returns the value of dataset `name[variable]` and other data about case(s) with the minimum value.
+- `FD.min(arr)`: Returns the minimum value in Array `arr`.
 
-- **TODO** `FD.max(name, variable)`: Returns the value of dataset `name[variable]' and other data about case(s) with the maximum value.
+- `FD.max(arr)`: Returns the maximum value in Array `arr`.
 
-- **TODO** `FD.mean(name, mode = 'arithmetic')`: Returns the mean value of dataset `name[variable]`. `mode` options: 'arithmetic'(default), 'geometric', 'harmonic'.
+- `FD.arithmetic_mean(arr)`: Returns the arithmetic mean of Array `arr`.
 
-- **TODO** `FD.median(name, variable)`: Returns the value of dataset `name[variable]` and other data about case(s) with, or surrounding, the median value.
+- `FD.geometric_mean(arr)`: Returns the geometric mean of Array `arr`.
 
-- **TODO** `FD.mode(name, variable)`: Returns the value of dataset `name[variable]` and other data about case(s) with the modal value.
+- `FD.harmonic_mean(arr)`: Returns the harmonic mean of Array `arr`.
+
+- `FD.median(arr)`: Returns the median value of Array `arr`.
+
+- `FD.mode(arr)`: Returns the modal value(s) of Array `arr`.
 
 - **TODO** `FD.mad(name, variable)`: Returns the mean absolute deviation of dataset `d[variable]`, the median absolute deviation and other data about the case(s) with, or surrounding, the median absolute deviation value.
 
@@ -198,7 +202,7 @@ Many of the functions in this library require first assigning data to a ***datas
 
 - **TODO** `FD.impurity(name, variable)`: Return inpurity, the inverse probabilty of randomly choosing two observations from dataset `name` with same values of `name[variable]`.
 
-- **TODO** `FD.stemplot(name, variable)`: Print stemplot of dataset `name[variable]` to the console and the session log.
+- `FD.stemplot(arr)`: Prints stemplot of values in Array `arr` to the console and the session log.
 
 
 ### Missingness
