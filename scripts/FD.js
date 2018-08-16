@@ -30,13 +30,15 @@ const FD = (function () {
    
    const SETTINGS = {
      DEFAULT_OUTPUT_FORMAT: "js",
-     LOG_NAME: `FD_log_${Log.session}.txt`
+     LOG_NAME: `FD_log_${Log.session}.txt`,
+     REAL_PRECISION: 5
    };
    
    /**
    * @description Update elapsed time since Log was initialized.
    * @param {datetime} `now` - The current time. Should be called with `Date.now()`
    */
+   //TODO format time in hours/minutes/seconds
    const update_time = (now = Date.now()) => {
      const seconds = ((now - Log.initialized) / 1000).toFixed(2);
      return `@+ ${seconds} seconds:\n`;
@@ -251,6 +253,12 @@ const FD = (function () {
    */
    const scalar = test_value => (/string|number|boolean/).test(typeof test_value);
 
+   /**
+   * @description Returns Number with SETTINGS.REAL_PRECISION values to the right of the decimal point.
+   * @param {Number} `x` - The target value.
+   */
+   //TODO why no like toFixed()?
+   const real = x => Number(parseFloat(x).toFixed(SETTINGS.REAL_PRECISION));
    /**
    * @description Returns type (string, integer, real, boolean, mixed) of values in `arr`.
    * @param {array} arr - The array of values to check for type.
@@ -1105,6 +1113,7 @@ const FD = (function () {
    * @description Returns the modal value(s) of Array `arr`.
    * @param {Array} `arr` - a 1d array.
    */
+   //TODO handle missing values
    const mode = (arr) => {
      let counter = {}, mode = [], max = 0;
      for (let i in arr) {
@@ -1121,48 +1130,46 @@ const FD = (function () {
      return mode;
    }
    
+   //TODO handle missing values
    const median = arr => {
-     if (!!arr.length) {
-       arr.sort(ascending);
-       const mid = Math.floor(arr.length / 2);
+     let result;
+     let non_missing = arr.filter(f => !is_missing(f));
+     if (!!non_missing.length) {
+       non_missing.sort(ascending);
+       const mid = Math.floor(non_missing.length / 2);
        /* If arr.length is odd, assign middle value */
-       if ((arr.length % 2) == 1) return arr[mid];
+       if ((non_missing.length % 2) == 1) result = non_missing[mid];
        /* Otherwise assign halfway between two middle values */
-       else return (arr[mid - 1] + arr[mid]) / 2;
+       else result = (non_missing[mid - 1] + non_missing[mid]) / 2;
+       return {"Median": real(result), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
      }
    }
    
-   const arithmetic_mean = (arr) => (!!arr.length) ? sum(arr) / arr.length : NaN;
+   //TODO handle missing values
+   const arithmetic_mean = (arr) => (!!arr.length) ? real(sum(arr) / arr.length) : NaN;
    
-   const geometric_mean = (arr) => (!!arr.length) ? Math.pow(product(arr), (1 / arr.length)) : NaN;
+   const geometric_mean = (arr) => (!!arr.length) ? real(Math.pow(product(arr), (1 / arr.length))) : NaN;
    
-   const harmonic_mean = (arr) => (!!arr.length) ? arr.length / sum(arr.map(m => 1 / m)) : NaN;
+   const harmonic_mean = (arr) => (!!arr.length) ? real(arr.length / sum(arr.map(m => 1 / m))) : NaN;
    
    /**
    * @description Print a stem-and-leaf plot to console and session log
    * @param `arr` - Variable of type integer or real.
-   * @param `extra_text` - ?.
+   * @param `extra_text` - Title or Annotation to print over the plot.
    */
-   //TODO fix base alignment
+   //TODO handle missing values
    const stemplot = (arr, extra_text = '') => {
-     const format = (maximum, base, x) => {
-       let result = '';
-       let max_length = (Math.floor(maximum/base)).toString().length;
-       let x_length = (Math.floor(x/base)).toString().length;
-       console.log("max length: " + max_length + "/ x length: " + x_length);
-       if ((max_length - x_length) === 0){
-         return x.toString();
-       }
-       else if ((max_length - x_length) === 1){
-         return ("_" + x.toString());
-       }
-       else if ((max_length - x_length) === 2){
-         return ("__" +  x.toString());
-       }
-     }
      let minimum = min(arr);
      let maximum = max(arr);
      let range = maximum - minimum;
+     const format = (x) => {
+       let result = '';
+       for (let i = 0; i < (maximum.toString().length - x.toString().length); i++){
+         result += " ";
+       }
+       result += x.toString();
+       return result;
+     }
      let possible = [0.01, 0.1, 1, 10, 100, 1000, 10000];
      let base = null;
      for (let i = 0; i < possible.length; i++){
@@ -1176,18 +1183,47 @@ const FD = (function () {
        let text = `\n\n${extra_text}\nStem-and-Leaf Plot (Base = ${base})\n\n`;
        for (let j = Math.floor(minimum/base); j <= Math.floor(maximum/base); j++){
          let row = [];
-         text = `${text}${format(maximum, base, j)}|`;
+         text = `${text}${format(j)}|`;
          text = `${text}${arr.filter(f => Math.floor(f/base) === j).map(m => m % base).sort(ascending).join('')}\n`;
        }
        update_log(text);
        console.log(text);
        return true;
      }
-     let o = "stemplot(): Data is ill-formed for Stem-and-Leaf Plot."
+     let o = "FD.stemplot(): Data is ill-formed for Stem-and-Leaf Plot."
      update_log(o);
      console.log(o);
    }
+   
+   /**
+   * @description Returns the population variance of values in Array `arr`.
+   * @param `arr` - Variable of type integer or real.
+   */
+   //TODO handle missing values
+   const variance = arr => {
+     let non_missing = arr.filter(f => !is_missing(f));
+     let sse = 0;
+     const mean = arithmetic_mean(arr);
+     for (let i = 0; i < arr.length; i++){
+       sse += Math.pow((mean - arr[i]), 2);
+     }
+     return {"Population_Variance": real(sse / non_missing.length), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+   }
 
+   /**
+   * @description Returns the Mean Absolute Deviation and Median Absolute Deviation of values in Array `arr`.
+   * @param `arr` - Variable of type integer or real.
+   */
+   //TODO handle missing values
+   const mad = arr => {
+     let non_missing = arr.filter(f => !is_missing(f));
+     const absolute_deviation = [];
+     const mean = arithmetic_mean(non_missing);
+     for (let i = 0; i < non_missing.length; i++){
+       absolute_deviation.push(Math.abs(mean - non_missing[i]));
+     }
+     return {"MAD": real(arithmetic_mean(absolute_deviation)), "MedianAD": median(absolute_deviation), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+   }
    // EXPORT FUNCTIONS
    
    return {
@@ -1220,7 +1256,7 @@ const FD = (function () {
       
       random_int, random_real, coin_flip, plus_or_minus,
       
-      min, max, mode, median, arithmetic_mean, geometric_mean, harmonic_mean, stemplot
+      min, max, mode, median, arithmetic_mean, geometric_mean, harmonic_mean, stemplot, variance, mad, real
       
    };
    
