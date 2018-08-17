@@ -195,14 +195,14 @@ Many of the functions in this library require first assigning data to a ***datas
 - `FD.mode(arr)`: Returns Returns object `{"Median": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
 - `FD.mad(name, variable)`: Returns object that includes the mean absolute deviation (i.e., the average absolute difference between the mean and each value in Array `arr`) and median absolute deviation (i.e., the median of absolute differences between te mean and each value in Array `arr`). The returned object: `{"MAD": #, "Median_Absolute_Deviation": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
-![Mean Absolute Deviation](https://wikimedia.org/api/rest_v1/media/math/render/svg/d3b7f03e504d1a16a212827c21decae2e30f7f7f)
+
+ ![Mean Absolute Deviation](https://wikimedia.org/api/rest_v1/media/math/render/svg/d3b7f03e504d1a16a212827c21decae2e30f7f7f)
 
 - `FD.variance(arr)`: Returns the object `{"Population_Variance": #, "Missing": #, "Non_Missing": #}`. The population variance is calculated as the sum of squared deviations divided by the number of cases in the population.
 
 - `FD.gini(name, variable)`: Returns the object `{"Gini_Index": #, "Missing": #, "Non_Missing": #}`. The Gini Index is calculated as:
 
-![Gini Coefficient](https://wikimedia.org/api/rest_v1/media/math/render/svg/569fc4addfa2936ab72b0b87f7f6ca929d35846c)
-Format: ![Ooops!](https://wikimedia.org/api/rest_v1/media/math/render/svg/569fc4addfa2936ab72b0b87f7f6ca929d35846c)
+ ![Gini Coefficient](https://wikimedia.org/api/rest_v1/media/math/render/svg/569fc4addfa2936ab72b0b87f7f6ca929d35846c)
 
 - `FD.stemplot(arr)`: Prints stemplot of values in Array `arr` to the console and the session log.
 
@@ -230,6 +230,7 @@ Format: ![Ooops!](https://wikimedia.org/api/rest_v1/media/math/render/svg/569fc4
 ### Comparing Distributions
 
 - `FD.jaccard(name, variable)`: Returns the approximate percentage of non-overlap in the distributions of Array `arr1` and Array `arr2`.
+ 
  ![Jaccard Index](https://wikimedia.org/api/rest_v1/media/math/render/svg/eaef5aa86949f49e7dc6b9c8c3dd8b233332c9e7)
 
 - TODO `super_stemplot()`:
