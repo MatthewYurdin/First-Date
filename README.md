@@ -184,23 +184,23 @@ Many of the functions in this library require first assigning data to a ***datas
 
 - `FD.max(arr)`: Returns the maximum value in Array `arr`.
 
-- `FD.arithmetic_mean(arr)`: Returns the arithmetic mean of Array `arr`.
+- `FD.arithmetic_mean(arr)`: Returns object `{"Arithmetic_Mean": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
-- `FD.geometric_mean(arr)`: Returns the geometric mean of Array `arr`.
+- `FD.geometric_mean(arr)`: Returns object `{"Geometric_Mean": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
-- `FD.harmonic_mean(arr)`: Returns the harmonic mean of Array `arr`.
+- `FD.harmonic_mean(arr)`: Returns object `{"Harmonic_Mean": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
-- `FD.median(arr)`: Returns the median value of Array `arr`.
+- `FD.median(arr)`: Returns object `{"Median": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
-- `FD.mode(arr)`: Returns the modal value(s) of Array `arr`.
+- `FD.mode(arr)`: Returns Returns object `{"Median": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
-- **TODO** `FD.mad(name, variable)`: Returns the mean absolute deviation of dataset `d[variable]`, the median absolute deviation and other data about the case(s) with, or surrounding, the median absolute deviation value.
+- `FD.mad(name, variable)`: Returns object that includes the mean absolute deviation (i.e., the average absolute difference between the mean and each value in Array `arr`) and median absolute deviation (i.e., the median of absolute differences between te mean and each value in Array `arr`). The returned object: `{"MAD": #, "Median_Absolute_Deviation": #, "Missing": #, "Non_Missing": #}` based on Array `arr`.
 
-- **TODO** `FD.variance(name, variable)`: Returns the variance of `name[variable]`.
+- `FD.variance(arr)`: Returns the object `{"Population_Variance": #, "Missing": #, "Non_Missing": #}`. The population variance is calculated as the sum of squared deviations divided by the number of cases in the population.
 
-- **TODO** `FD.gini(name, variable)`:
+- `FD.gini(name, variable)`: Returns the object `{"Gini_Index": #, "Missing": #, "Non_Missing": #}`. The Gini Index is calculated as the sum of absolute deviations over the product of 2, the number of cases, and the sum of values in Array `arr`.
 
-- **TODO** `FD.impurity(name, variable)`: Return inpurity, the inverse probabilty of randomly choosing two observations from dataset `name` with same values of `name[variable]`.
+- `FD.jaccard(name, variable)`: Returns the approximate percentage of non-overlap in the distributions of Array `arr1` and Array `arr2`.
 
 - `FD.stemplot(arr)`: Prints stemplot of values in Array `arr` to the console and the session log.
 
