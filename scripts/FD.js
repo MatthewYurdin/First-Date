@@ -407,7 +407,7 @@ const FD = (function () {
    * @param {Number} `precision` - The number of places to the right of the decimal point.
    * Defaults to 5.
    */
-   const random_real = (max = 1000000, precision = 5) => Number((Math.random() * max).toFixed(5));
+   const random_real = (max = 1000000) => Number((Math.random() * max).toFixed(SETTINGS.REAL_PRECISION));
 
    /**
    * @description Returns a random boolean value.
@@ -1101,13 +1101,13 @@ const FD = (function () {
    * @description Returns the minimum value and the index or indices with the value
    * @param {Array} `arr` - a 1d array.
    */
-   const min = (arr) => arr.sort(ascending)[0];
+   const min = (arr) => arr.filter(f => !is_missing(f)).sort(ascending)[0];
    
    /**
    * @description Returns the maximum value and the index or indices with the value
    * @param {Array} `arr` - a 1d array.
    */
-   const max = (arr) => arr.sort(descending)[0];
+   const max = (arr) => arr.filter(f => !is_missing(f)).sort(descending)[0];
    
    /**
    * @description Returns the modal value(s) of Array `arr`.
@@ -1116,21 +1116,21 @@ const FD = (function () {
    //TODO handle missing values
    const mode = (arr) => {
      let counter = {}, mode = [], max = 0;
-     for (let i in arr) {
-       if (!(arr[i] in counter))
-         counter[arr[i]] = 0;
-       counter[arr[i]]++;
-       if (counter[arr[i]] == max)
-         mode.push(arr[i]);
-       else if (counter[arr[i]] > max) {
-         max = counter[arr[i]];
-         mode = [arr[i]];
+     let non_missing = arr.filter(f => !is_missing(f));
+     for (let i in non_missing) {
+       if (!(non_missing[i] in counter))
+         counter[non_missing[i]] = 0;
+       counter[non_missing[i]]++;
+       if (counter[non_missing[i]] == max)
+         mode.push(non_missing[i]);
+       else if (counter[non_missing[i]] > max) {
+         max = counter[non_missing[i]];
+         mode = [non_missing[i]];
        }
      }
-     return mode;
+     return {"Mode": mode, "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
    }
    
-   //TODO handle missing values
    const median = arr => {
      let result;
      let non_missing = arr.filter(f => !is_missing(f));
@@ -1145,13 +1145,20 @@ const FD = (function () {
      }
    }
    
-   //TODO handle missing values
-   const arithmetic_mean = (arr) => (!!arr.length) ? real(sum(arr) / arr.length) : NaN;
+   const arithmetic_mean = (arr) => {
+     let non_missing = arr.filter(f => !is_missing(f));
+     return {"Arithmetic_Mean": real(sum(non_missing) / non_missing.length), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+   }
    
-   const geometric_mean = (arr) => (!!arr.length) ? real(Math.pow(product(arr), (1 / arr.length))) : NaN;
+   const geometric_mean = (arr) => {
+     let non_missing = arr.filter(f => !is_missing(f));
+     return {"Geometric_Mean": real(Math.pow(product(non_missing), (1 / non_missing.length))), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+   }
    
-   const harmonic_mean = (arr) => (!!arr.length) ? real(arr.length / sum(arr.map(m => 1 / m))) : NaN;
-   
+   const harmonic_mean = (arr) => {
+     let non_missing = arr.filter(f => !is_missing(f));
+     return {"Harmonic_Mean": real(non_missing.length / sum(non_missing.map(m => 1 / m))), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+   }
    /**
    * @description Print a stem-and-leaf plot to console and session log
    * @param `arr` - Variable of type integer or real.
@@ -1199,13 +1206,12 @@ const FD = (function () {
    * @description Returns the population variance of values in Array `arr`.
    * @param `arr` - Variable of type integer or real.
    */
-   //TODO handle missing values
    const variance = arr => {
      let non_missing = arr.filter(f => !is_missing(f));
      let sse = 0;
-     const mean = arithmetic_mean(arr);
-     for (let i = 0; i < arr.length; i++){
-       sse += Math.pow((mean - arr[i]), 2);
+     const mean = arithmetic_mean(arr)["Arithmetic_Mean"];
+     for (let i = 0; i < non_missing.length; i++){
+       sse += Math.pow((mean - non_missing[i]), 2);
      }
      return {"Population_Variance": real(sse / non_missing.length), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
    }
@@ -1220,10 +1226,55 @@ const FD = (function () {
      const absolute_deviation = [];
      const mean = arithmetic_mean(non_missing);
      for (let i = 0; i < non_missing.length; i++){
-       absolute_deviation.push(Math.abs(mean - non_missing[i]));
+       absolute_deviation.push(real(Math.abs(mean - non_missing[i])));
      }
-     return {"MAD": real(arithmetic_mean(absolute_deviation)), "MedianAD": median(absolute_deviation), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+     return {"MAD": real(arithmetic_mean(absolute_deviation)["Arithmetic_Mean"]), "MedianAD": median(absolute_deviation)["Median"], "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
    }
+   
+   /**
+   * @description Returns Gini Coefficient of values in Array `arr`.
+   * @param `arr` - Variable of type integer or real.
+   */
+   //TODO check calculation
+   const gini = arr => {
+     let non_missing = arr.filter(f => !is_missing(f));
+     let sum_of_differences = 0;
+     for (let i = 0; i < non_missing.length; i++){
+       for (let j = 0; j < non_missing.length; j++){
+         sum_of_differences += Math.abs(non_missing[i] - non_missing[j]);
+       }
+     }
+     return {"Gini": real(sum_of_differences / (2 * non_missing.length * sum(non_missing))), "Missing": (arr.length - non_missing.length), "Non_Missing": non_missing.length};
+   }
+   
+   /**
+   * @description Returns Jaccard Index of values in Array `arr`.
+   * @param `arr` - Variable of type integer or real.
+   */
+   //TODO check calculation
+   const jaccard = (arr1, arr2) => {
+     let non_missing1 = arr1.filter(f => !is_missing(f));
+     let non_missing2 = arr2.filter(f => !is_missing(f));
+     let start = min([min(non_missing1), min(non_missing1)]);
+     let end = max([max(non_missing1), max(non_missing1)]);
+     let range = end - start;
+     let possible = [0.01, 0.1, 1, 10, 100, 1000, 10000];
+     let base = null;
+     for (let i = 0; i < possible.length; i++){
+       if ((range / possible[i]) > 7){
+           base = possible[i];
+       }
+     }
+     let deviations = [];
+     for (let j = Math.floor(start/base); j <= Math.floor(end/base); j++){
+       let in_1 = non_missing1.filter(f => Math.floor(f/base) === j).length / non_missing1.length;
+       let in_2 = non_missing2.filter(f => Math.floor(f/base) === j).length / non_missing2.length;
+       deviations.push(real(Math.abs(in_1 - in_2)));
+     }
+     return {"Jaccard": sum(deviations), "Missing": ((arr1.length + arr2.length) - (non_missing1.length + non_missing2.length)), "Non_Missing": (non_missing1.length + non_missing2.length)};
+   }
+   
+   
    // EXPORT FUNCTIONS
    
    return {
@@ -1256,7 +1307,7 @@ const FD = (function () {
       
       random_int, random_real, coin_flip, plus_or_minus,
       
-      min, max, mode, median, arithmetic_mean, geometric_mean, harmonic_mean, stemplot, variance, mad, real
+      min, max, mode, median, arithmetic_mean, geometric_mean, harmonic_mean, stemplot, variance, mad, gini, jaccard, real
       
    };
    
